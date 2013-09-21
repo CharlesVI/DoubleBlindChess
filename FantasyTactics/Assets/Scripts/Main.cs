@@ -49,13 +49,7 @@ public class Main : MonoBehaviour {
 
         if (Input.GetMouseButtonDown(0))
         {
-            //Debug.Log("Click registered");
-            
-            //Debug.Log(Input.mousePosition);
-            Vector3 pos = Input.mousePosition;
-            //pos.z = 20;
-            Ray ray2 = Camera.main.ScreenPointToRay(pos);
-            ray = ray2;
+            ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             if (Physics.Raycast(ray, out hit))
             {
