@@ -1,85 +1,70 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-public class Main : MonoBehaviour 
-{
+public class Main : MonoBehaviour {
 
-    const int yMax = 16; //Outputs grid 0-15, 0-31
-    const int xMax = 8;
-    Tile[,] tile = new Tile[xMax, yMax];
+    int maxX = 8;
+    int maxY = 8;
 
-    FContainer board;
+    public GameObject tile;
+    GameObject[,] tiles = new GameObject[8, 8];
+
+    Ray ray;
+    RaycastHit hit;
 
 	// Use this for initialization
-	void Start ()
+	void Start () 
     {
-        FutileParams fprams = new FutileParams(true, true, false, false);
         
-        fprams.AddResolutionLevel(480.0f, 1.0f, 1.0f, "");
-        
-        fprams.origin = new Vector2(0.5f,0.5f);
-        
-        Futile.instance.Init(fprams);
-
-        Futile.atlasManager.LoadAtlas("Atlases/FantasyTacticsAtlas");
-       
-        Futile.stage.AddChild(board = new FContainer());
-
-        //board.x = Futile.screen.halfWidth;
-        //board.y = Futile.screen.halfHeight;
-
-        SetupTiles();
-
-        Debug.Log("x,y of 0,0 = " + tile[0, 10].sprite.x + " " + tile[0, 10].sprite.y);
+        SetupBoard();
 	}
 
-    public void SetupTiles()
+	void SetupBoard()
     {
+        for (int xx = 0; xx < maxX; xx++) for (int yy = 0; yy < maxY; yy++)
+        {
+            //tiles[xx,yy] = new GameObject("tile " +xx + "," +yy);
+            tiles[xx, yy] = (GameObject)Instantiate(tile,new Vector3(xx * 3, 0,yy*3), Quaternion.identity);
+            tiles[xx, yy].SetActive(true);
+            tiles[xx,yy].name = "tile " + xx + "," + yy;
 
+            int counter = xx + yy;
+            if(counter % 2 == 0)
+            {
+                tiles[xx, yy].transform.renderer.material.color = Color.black;
+            }
 
-        for (int xx = 0; xx < xMax; xx++) for (int yy = 0; yy < yMax; yy++)
-         {
-            tile[xx, yy] = new Tile();
-            tile[xx, yy].position = new Vector2(xx, yy);
-            tile[xx, yy].sprite = new FSprite("DesertTile");
+            if (counter % 2 != 0)
+            { 
+                tiles[xx, yy].transform.renderer.material.color = Color.white;
+            }
+        }
             
-            board.AddChild(tile[xx, yy].sprite);
-
-            tile[xx, yy].sprite.scale = 0.25f;
-   
-            tile[xx, yy].sprite.x = xx * tile[xx, yy].sprite.width;
-               
-            tile[xx, yy].sprite.y = -yy * tile[xx, yy].sprite.height;
-
-
-
-            
-
-            /*
-                if (tile[xx, yy].sprite == null)
-                {
-                    Debug.Log("error is here"); //Seems like it is not here.
-                }
-              */ 
-                //Debug.Log("Created a tile @ " + tile[xx, yy].position + "! XX,YY = " + xx + yy); //Works as expected.
-
-         }
-
     }
 
     // Update is called once per frame
-    void Update() 
+    void Update()
     {
-        GetInput();
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            //Debug.Log("Click registered");
+            
+            //Debug.Log(Input.mousePosition);
+            Vector3 pos = Input.mousePosition;
+            //pos.z = 20;
+            Ray ray2 = Camera.main.ScreenPointToRay(pos);
+            ray = ray2;
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                hit.collider.renderer.material.color = Color.red;
+                Debug.Log(hit.transform.name);
+                //Debug.Log(hit);
+            }
+            
+        }
+	
 	}
-
-    void GetInput()
-    {
-        int scrollSpeed =2;
-
-        if (Input.GetKey(KeyCode.UpArrow)) { board.y-= scrollSpeed; }
-        if (Input.GetKey(KeyCode.DownArrow)) { board.y+= scrollSpeed; }
-        if (Input.GetKey(KeyCode.LeftArrow)) { board.x+= scrollSpeed; }
-        if (Input.GetKey(KeyCode.RightArrow)) { board.x-= scrollSpeed; }
-    }
 }
