@@ -2,7 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class Main : MonoBehaviour {
+public class Main : MonoBehaviour 
+{
 
     int maxX = 8;
     int maxY = 8;
@@ -42,36 +43,59 @@ public class Main : MonoBehaviour {
             int counter = xx + yy;
             if(counter % 2 == 0)
             {
-                tiles[xx, yy].gameObject.transform.renderer.material.color = Color.black;
+                tiles[xx, yy].StartColor(Color.black);
+                //tiles[xx, yy].gameObject.transform.renderer.material.color = Color.black;
             }
 
             if (counter % 2 != 0)
             { 
-                tiles[xx, yy].gameObject.transform.renderer.material.color = Color.white;
+                tiles[xx, yy].StartColor(Color.white);
             }
         }
             
     }
 
+    /// <summary>
+    /// This is the Inital set up of a standard chess board. Nothing really clever happens here and its a
+    /// Huge section. But it works and I got it done fast so thats good.
+    /// </summary>
     void SetupPieces()
     {
         for (int ii = 0; ii < 32; ii++)
         { 
             pieces[ii] = new Piece();
             pieces[ii].gameObject = (GameObject)Instantiate(pieceGO, new Vector3(0, 0, 0), Quaternion.identity);
+            pieces[ii].gameObject.name = "Piece " + ii;
 
             if(ii < 16)
             {
-                pieces[ii].player = 1;
+                pieces[ii].player = 2;
                 pieces[ii].gameObject.transform.renderer.material.color = Color.red;
             }
 
             if(ii > 15)
             {
-                pieces[ii].player = 2;
+                pieces[ii].player = 1;
                 pieces[ii].gameObject.transform.renderer.material.color = Color.blue;
             }
         }
+
+        for (int xx = 0; xx < 8; xx++) for (int yy = 0; yy < 2; yy++)
+            {
+                //Debug.Log(xx + "," + yy + " set to occupied");
+                tiles[xx, yy].occupied = true;
+            }
+
+        for (int xx = 0; xx < 8; xx++) for (int yy = 6; yy < 8; yy++)
+            {
+                //Debug.Log(xx + "," + yy + " set to occupied");
+                tiles[xx, yy].occupied = true;
+            }
+
+        //If I run this the other way around I can set occupied to false as well. Or I could just handle that
+        //as a part of the movement procedure. No idea what would be more cost effective or reliable.
+
+
         
         //At this point I'm just going to maunally set the pieces up. Either it will always be this set up or some level of custom work will be involved and i'll loop through a list per player.
         
@@ -168,42 +192,125 @@ public class Main : MonoBehaviour {
 
             if (Physics.Raycast(ray, out hit, 200.0f))
             {
-                string tagPiece = "Piece";
-                string tagTile = "Tile";
-
-                if (hit.collider.gameObject.tag == tagPiece)
-                {
-                    Debug.Log("I hit a piece");
-                    Debug.Log("it is at " + hit.collider.gameObject.transform.position + "and is a " + hit.collider.gameObject.tag);
-                    foreach(Piece piece in pieces)
-                    {
-                        if (hit.collider.gameObject.transform.position == piece.gameObject.transform.position)
-                        {
-                            Debug.Log("I am a " + piece.type);
-                        }
-                    }
-                }
-
-                if (hit.collider.gameObject.tag == tagTile)
-                {
-                    Debug.Log("shot a tile");
-                }
+                LeftClickLogic(hit);
             }
             
         }
 	
 	}
 
+    void OnGUI()
+    {
+        float btnHeight = 40;
+        float btnWidth = 120;
 
-    //Doesnt work reliably.
-    IEnumerator HighlightTile(GameObject tile)
-    { 
-        Color originalColor;
-        float delay = 0.5f;
-        originalColor = tile.transform.renderer.material.color;
-        tile.transform.renderer.material.color = Color.red;
-        yield return new WaitForSeconds(delay);
-        tile.transform.renderer.material.color = originalColor;
-        
+        if (GUI.Button(new Rect(10, 10, btnWidth, btnHeight), "Confirm Move"))
+        {
+            Debug.Log("MOVE CONFIRMED!");
+        }
+        if (GUI.Button(new Rect(10, 50, btnWidth, btnHeight), "No don't do it!"))
+        {
+            Debug.Log("Abort the manuver");
+        }
+    
     }
-}
+
+    void LeftClickLogic(RaycastHit hit)
+    {
+        string tagPiece = "Piece";
+        string tagTile = "Tile";
+
+        if (hit.collider.gameObject.tag == tagPiece)
+        {
+            Piece clickedPiece = new Piece();
+
+            ClearHighlights();
+            
+            //Find out what kind of piece I clicked in the list of pieces that exist.
+            foreach (Piece piece in pieces)
+            {
+                if (hit.collider.gameObject.transform.position == piece.gameObject.transform.position)
+                {
+                    clickedPiece = piece;
+                    
+                }
+            }
+
+            Vector3 position = clickedPiece.gameObject.transform.position;
+            List<Vector2> possibleMoves = new List<Vector2>();
+            //This may be redundant I could just have if Occupied && moveable register it as an attack.
+            List<Vector2> possibleAttacks = new List<Vector2>();
+
+
+            //Determin where that peice may move / attack
+            switch (clickedPiece.type)
+            { 
+                case Piece.Type.PAWN:
+                    HighlightMoves(possibleMoves = clickedPiece.PawnMoves(position, clickedPiece.player, tiles));
+                    break;
+
+                case Piece.Type.BISHOP:
+                case Piece.Type.KNIGHT:
+                case Piece.Type.ROOK:
+                case Piece.Type.QUEEN:
+                case Piece.Type.KING:
+
+                default:
+                    Debug.Log("Something wrong in piece type");
+                    break;
+            }  
+        }
+
+
+        if (hit.collider.gameObject.tag == tagTile)
+        {
+            Tile selectedTile = new Tile();
+
+            int x = (int)hit.collider.gameObject.transform.position.x / 3;
+            int y = (int)hit.collider.gameObject.transform.position.z / 3;
+
+            selectedTile = tiles[x, y];
+
+            //If its a blue tile set it as the intended destination and clear any other
+            //possible destination
+            if (selectedTile.moveable)
+            {
+                foreach (Tile tile in tiles)
+                {
+                    if (tile.destination)
+                    {
+                        tile.Moveable();
+                    }
+                }
+
+                selectedTile.Destination();
+
+                //TODO enable Yes / No confirm move buttons.
+            }
+
+           
+        }
+    
+    }//Left Click Logic
+
+    public void HighlightMoves(List<Vector2> moveList)
+    {
+        foreach( Vector2 move in moveList)
+        {
+            tiles[(int)move.x, (int)move.y].Moveable();
+        }
+    }
+
+    //I could probally save the list and only undo the tiles that are actually highlighted
+    //However I dont think it will make a performance diffrence and it might even be an
+    //advantage not having to go through multipul things and refrence stuff.
+    public void ClearHighlights()
+    {
+        foreach (Tile tile in tiles)
+        {
+            tile.UnHighlight();
+        }
+    }
+
+}//Class     
+
