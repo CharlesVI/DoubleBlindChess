@@ -236,28 +236,33 @@ public class Main : MonoBehaviour
                 }
             }
 
-            //Presently this could be converted into a vector2 from what I see. really should stop using world
-            //coords as board ones... lots of /3 errors.
-            Vector3 position = clickedPiece.gameObject.transform.position;
-            origin = new Vector2(position.x / 3, position.z / 3);
+            //Make sure the piece is owned by the player.
+            if (clickedPiece.player == whatPlayerAmI)
+            {
+                //Presently this could be converted into a vector2 from what I see. really should stop using world
+                //coords as board ones... lots of /3 errors.
+                Vector3 position = clickedPiece.gameObject.transform.position;
 
-            //Determin where that peice may move / attack
-            switch (clickedPiece.type)
-            { 
-                case Piece.Type.PAWN:
-                    HighlightMoves(clickedPiece.PawnMoves(position, clickedPiece.player, tiles));
-                    break;
+                origin = new Vector2(position.x / 3, position.z / 3);
 
-                case Piece.Type.BISHOP:
-                case Piece.Type.KNIGHT:
-                case Piece.Type.ROOK:
-                case Piece.Type.QUEEN:
-                case Piece.Type.KING:
+                //Determin where that peice may move / attack
+                switch (clickedPiece.type)
+                {
+                    case Piece.Type.PAWN:
+                        HighlightMoves(clickedPiece.PawnMoves(position, clickedPiece.player, tiles));
+                        break;
 
-                default:
-                    Debug.Log("Something wrong in piece type");
-                    break;
-            }  
+                    case Piece.Type.BISHOP:
+                    case Piece.Type.KNIGHT:
+                    case Piece.Type.ROOK:
+                    case Piece.Type.QUEEN:
+                    case Piece.Type.KING:
+
+                    default:
+                        Debug.Log("Something wrong in piece type");
+                        break;
+                }
+            }//Ownership Check
         }
 
 
