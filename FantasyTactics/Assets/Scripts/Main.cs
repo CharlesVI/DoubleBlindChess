@@ -244,17 +244,23 @@ public class Main : MonoBehaviour
                 Vector3 position = clickedPiece.gameObject.transform.position;
 
                 origin = new Vector2(position.x / 3, position.z / 3);
-
                 //Determin where that peice may move / attack
                 switch (clickedPiece.type)
                 {
                     case Piece.Type.PAWN:
-                        HighlightMoves(clickedPiece.PawnMoves(position, clickedPiece.player, tiles));
+                        HighlightMoves(clickedPiece.PawnMoves(origin, clickedPiece.player, tiles, pieces));
                         break;
 
                     case Piece.Type.BISHOP:
+                        HighlightMoves(clickedPiece.BishopMoves(origin, clickedPiece.player,
+                            tiles, pieces));
+                        break;
+
                     case Piece.Type.KNIGHT:
                     case Piece.Type.ROOK:
+                        HighlightMoves(clickedPiece.RookMoves(origin, clickedPiece.player, tiles, pieces));
+                        break;
+
                     case Piece.Type.QUEEN:
                     case Piece.Type.KING:
 
@@ -337,9 +343,19 @@ public class Main : MonoBehaviour
 
     public void ConfirmMove()
     {
-        Debug.Log("MOVE CONFIRMED!");
-        Debug.Log("We are going from " + origin);
-        Debug.Log("To " + destination);
+        if (whatPlayerAmI == 1)
+        {
+            playerOneReady = true;
+            p1Destination = destination;
+            p1Origin = origin;
+        }
+
+        if (whatPlayerAmI == 2)
+        {
+            playerTwoReady = true;
+            p2Destination = destination;
+            p2Orgin = origin;
+        }
         Clear();
     }
     public void AbortMove()
@@ -349,16 +365,24 @@ public class Main : MonoBehaviour
 
     public void PlayerSelector()
     {
-        GUI.Label(new Rect(Screen.width - 130, 90, 120, 40), "I am player " + whatPlayerAmI);
+        
 
         if (GUI.Button(new Rect(Screen.width - 130, 10, 120, 40), "Player 1"))
         {
             whatPlayerAmI = 1;
+            Clear();
         }
+
         if (GUI.Button(new Rect(Screen.width - 130, 50, 120, 40), "Player 2"))
         {
             whatPlayerAmI = 2;
+            Clear();
         }
+
+        GUI.Label(new Rect(Screen.width - 130, 90, 120, 40), "I am player " + whatPlayerAmI);
+
+        GUI.Label(new Rect(Screen.width - 130, 130, 120, 40), "Player 2 ready: " + playerTwoReady);
+        GUI.Label(new Rect(Screen.width - 130, 170, 120, 40), "Player 1 ready: " + playerOneReady);
     }
 }//Class     
 
