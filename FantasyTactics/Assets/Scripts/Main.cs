@@ -14,14 +14,27 @@ public class Main : MonoBehaviour
     public GameObject pieceGO;
     Piece[] pieces = new Piece[32];
    
-
     Ray ray;
     RaycastHit hit;
 
+    Vector2 origin;
+    Vector2 destination;
+
+    bool readyToMove;
+
+    int whatPlayerAmI = 0;
+    
+    bool playerOneReady;
+    Vector2 p1Origin;
+    Vector2 p1Destination;
+    
+    bool playerTwoReady;
+    Vector2 p2Orgin;
+    Vector2 p2Destination;
+
 	// Use this for initialization
 	void Start () 
-    {
-        
+    {   
         SetupBoard();
         SetupPieces();
 	}
@@ -185,7 +198,11 @@ public class Main : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        GetInput();
+	}
 
+    void GetInput()
+    {
         if (Input.GetMouseButtonDown(0))
         {
             ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -193,27 +210,10 @@ public class Main : MonoBehaviour
             if (Physics.Raycast(ray, out hit, 200.0f))
             {
                 LeftClickLogic(hit);
-            }
-            
+            }  
         }
-	
-	}
+    }//GetInput
 
-    void OnGUI()
-    {
-        float btnHeight = 40;
-        float btnWidth = 120;
-
-        if (GUI.Button(new Rect(10, 10, btnWidth, btnHeight), "Confirm Move"))
-        {
-            Debug.Log("MOVE CONFIRMED!");
-        }
-        if (GUI.Button(new Rect(10, 50, btnWidth, btnHeight), "No don't do it!"))
-        {
-            Debug.Log("Abort the manuver");
-        }
-    
-    }
 
     void LeftClickLogic(RaycastHit hit)
     {
@@ -224,7 +224,7 @@ public class Main : MonoBehaviour
         {
             Piece clickedPiece = new Piece();
 
-            ClearHighlights();
+            Clear();
             
             //Find out what kind of piece I clicked in the list of pieces that exist.
             foreach (Piece piece in pieces)
@@ -236,17 +236,16 @@ public class Main : MonoBehaviour
                 }
             }
 
+            //Presently this could be converted into a vector2 from what I see. really should stop using world
+            //coords as board ones... lots of /3 errors.
             Vector3 position = clickedPiece.gameObject.transform.position;
-            List<Vector2> possibleMoves = new List<Vector2>();
-            //This may be redundant I could just have if Occupied && moveable register it as an attack.
-            List<Vector2> possibleAttacks = new List<Vector2>();
-
+            origin = new Vector2(position.x / 3, position.z / 3);
 
             //Determin where that peice may move / attack
             switch (clickedPiece.type)
             { 
                 case Piece.Type.PAWN:
-                    HighlightMoves(possibleMoves = clickedPiece.PawnMoves(position, clickedPiece.player, tiles));
+                    HighlightMoves(clickedPiece.PawnMoves(position, clickedPiece.player, tiles));
                     break;
 
                 case Piece.Type.BISHOP:
@@ -284,13 +283,10 @@ public class Main : MonoBehaviour
                 }
 
                 selectedTile.Destination();
-
-                //TODO enable Yes / No confirm move buttons.
-            }
-
-           
+                destination = new Vector2(x, y);
+                readyToMove = true;
+            }           
         }
-    
     }//Left Click Logic
 
     public void HighlightMoves(List<Vector2> moveList)
@@ -304,13 +300,60 @@ public class Main : MonoBehaviour
     //I could probally save the list and only undo the tiles that are actually highlighted
     //However I dont think it will make a performance diffrence and it might even be an
     //advantage not having to go through multipul things and refrence stuff.
-    public void ClearHighlights()
+    public void Clear()
     {
         foreach (Tile tile in tiles)
         {
             tile.UnHighlight();
         }
+        origin = new Vector2(9, 9); 
+        destination = new Vector2(9, 9); // setting these two to null really is not needed. but it might trap errors.
+        readyToMove = false;
     }
 
+    void OnGUI()
+    {
+        float btnHeight = 40;
+        float btnWidth = 120;
+
+        if (readyToMove)
+        {
+            if (GUI.Button(new Rect(10, 10, btnWidth, btnHeight), "Confirm Move"))
+            {
+                ConfirmMove();
+            }
+            if (GUI.Button(new Rect(10, 50, btnWidth, btnHeight), "No don't do it!"))
+            {
+                AbortMove();
+            }          
+        }
+        PlayerSelector();
+    }//OnGUI
+
+    public void ConfirmMove()
+    {
+        Debug.Log("MOVE CONFIRMED!");
+        Debug.Log("We are going from " + origin);
+        Debug.Log("To " + destination);
+        Clear();
+    }
+    public void AbortMove()
+    {
+        Clear();
+    }
+
+    public void PlayerSelector()
+    {
+        GUI.Label(new Rect(Screen.width - 130, 90, 120, 40), "I am player " + whatPlayerAmI);
+
+        if (GUI.Button(new Rect(Screen.width - 130, 10, 120, 40), "Player 1"))
+        {
+            whatPlayerAmI = 1;
+        }
+        if (GUI.Button(new Rect(Screen.width - 130, 50, 120, 40), "Player 2"))
+        {
+            whatPlayerAmI = 2;
+        }
+    }
 }//Class     
 
