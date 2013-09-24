@@ -77,17 +77,20 @@ public class Piece
     {
         List<Vector2> possibleMoves = new List<Vector2>();
 
-        Debug.Log("Down moves called");
-
-        possibleMoves.AddRange(DownMoves(position, player, tiles, pieces, 8));
-        possibleMoves.AddRange(UpMoves(position, player, tiles, pieces, 8));
-        possibleMoves.AddRange(RightMoves(position, player, tiles, pieces, 8));
-        possibleMoves.AddRange(LeftMoves(position, player, tiles, pieces, 8));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, 0));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, 0));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 0, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 0, -1));
 
         return possibleMoves;
     }
 
-    //Knight Moves
+    public List<Vector2> KnightMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> possibleMoves = new List<Vector2>();
+
+        return possibleMoves;
+    }
 
     public List<Vector2> BishopMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     { 
@@ -105,6 +108,16 @@ public class Piece
     {
         List<Vector2> possibleMoves = new List<Vector2>();
 
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, 0));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, 0));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 0, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 0, -1));
+
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, -1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, -1));
+
         return possibleMoves;
     }
 
@@ -112,6 +125,16 @@ public class Piece
     public List<Vector2> KingMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     {
         List<Vector2> possibleMoves = new List<Vector2>();
+
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 1, 0));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, -1, 0));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 0, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 0, -1));
+
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 1, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, -1, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 1, -1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, -1, -1));
 
         return possibleMoves;
     }
@@ -289,43 +312,41 @@ public class Piece
         return rightMoves;
     }
 
-    List<Vector2> LineMoves(Vector2 position, int player, Tile[,] tiles,
+    List<Vector2> LineMoves(Vector2 origin, int player, Tile[,] tiles,
         Piece[] pieces, int maxDistance, int xDirection, int yDirection)
     {
         List<Vector2> lineMoves = new List<Vector2>();
 
-        int x = (int)position.x;
-        int y = (int)position.y;
-
-        int distance = 0;
+        int x = (int)origin.x;
+        int y = (int)origin.y;
 
         //can i use x direction to determin < 8 or > 0?
-        for (int xx = x; xx < 8 || xx > 0; xx += xDirection)
-            for(int yy = y; y < 8 || yy > 0; yy += yDirection)
+        for (int ii = 0; ii < maxDistance; ii++)
         {
-            if (!tiles[xx, yy].occupied)
-            {
-                lineMoves.Add(new Vector2(xx, yy));
-            }
 
-            if(tiles[xx,yy].occupied)
+            x += xDirection;
+            y += yDirection;
+
+            if (x < 8 && x > -1 && y < 8 && y > -1)
             {
-                foreach(Piece piece in pieces)
+                if (!tiles[x, y].occupied)
                 {
-                    if(piece.gameObject.transform.position.x / 3 == x && 
-                        piece.gameObject.transform.position.z / 3 == y &&
-                        piece.player != player)
-                    {
-                        lineMoves.Add(new Vector2(xx, yy));
-                    }
+                    lineMoves.Add(new Vector2(x, y));
                 }
-                return lineMoves;
-            }
 
-            distance++;
-            if(distance == maxDistance)
-            {
-                return lineMoves;
+                if (tiles[x, y].occupied)
+                {
+                    foreach (Piece piece in pieces)
+                    {
+                        if (piece.gameObject.transform.position.x / 3 == x &&
+                            piece.gameObject.transform.position.z / 3 == y &&
+                            piece.player != player)
+                        {
+                            lineMoves.Add(new Vector2(x, y));
+                        }
+                    }
+                    return lineMoves;
+                }
             }
         }
         return lineMoves;

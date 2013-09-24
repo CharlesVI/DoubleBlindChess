@@ -279,6 +279,7 @@ public class Main : MonoBehaviour
         ActuallyMovePiece(p2Orgin, p2Destination);
 
         Debug.Log("move finished w/o errors");
+        Debug.Log("Log Moves Here");
     }//Move Pieces
 
     int LeftOrRight(int x1, int x2)
@@ -347,6 +348,8 @@ public class Main : MonoBehaviour
                 piece.MovePieceTo(destination);
             }
         }
+        tiles[(int)origin.x, (int)origin.y].occupied = false;
+        tiles[(int)destination.x, (int)destination.y].occupied = true;
     }
 
     void LeftClickLogic(RaycastHit hit)
