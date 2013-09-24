@@ -199,6 +199,15 @@ public class Main : MonoBehaviour
     void Update()
     {
         GetInput();
+
+        if (playerOneReady && playerTwoReady)
+        {
+            Debug.Log("Move called");
+            MovePieces();
+
+            playerOneReady = false;
+            playerTwoReady = false;
+        }
 	}
 
     void GetInput()
@@ -214,6 +223,131 @@ public class Main : MonoBehaviour
         }
     }//GetInput
 
+    void MovePieces()
+    { 
+        //This is where pieces will be moved. I think I'm going to use the line move function
+        //to go step by step (distance 1) and see where they end up. If needed for animation I'll
+        //Save the steps. Later also save the start and end points for the battle log.
+
+        //Note on collisions: Peice A moves into where peice B is leaving is a collision iff
+        //Piece B moving into the square Piece a is leaving as well (or has become stationary)?. 
+
+        //Honestly I feel like this needs to be cracked into at least two methods.
+        //TODO clean this up into 2-3 methods instead of one big multi tasker.
+        
+        int p1x1 = (int)p1Origin.x;
+        int p1x2 = (int)p1Destination.x;
+        int p1y1 = (int)p1Origin.y;
+        int p1y2 = (int)p1Destination.y;
+        Vector2 p1Direction;
+
+        int p2x1 = (int)p2Orgin.x;
+        int p2x2 = (int)p2Destination.x;
+        int p2y1 = (int)p2Orgin.y;
+        int p2y2 = (int)p2Destination.y;
+        Vector2 p2Direction;
+
+        p1Direction = new Vector2(LeftOrRight(p1x1,p1x2), UpOrDown(p1y1, p1y2));
+        p2Direction = new Vector2(LeftOrRight(p2x1, p2x2), UpOrDown(p2y1, p2y2));
+
+        //Now we will step through one space at a time checking for collisions. p1 moves first
+        //effectivly this should make no diffrence but it makes a easier program
+        Vector2 p1Location = p1Origin;
+        Vector2 p2Location = p2Orgin;
+
+        do
+        {
+            Vector2 p1FormerLocation = p1Location;
+            Vector2 p2FormerLocation = p2Location;
+
+            p1Location += p1Direction;
+            p2Location += p2Direction;
+
+            if (p1Location == p2FormerLocation && p2Location == p1FormerLocation)
+            { 
+                //Mid Movement collision
+                Debug.Log("Mid Movement collision detected");
+            }
+   
+        }
+        while (p1Location != p1Destination && p2Location != p2Destination);
+
+        CaptureCheck(p1Destination);
+        CaptureCheck(p2Destination);
+
+        ActuallyMovePiece(p1Origin, p1Destination);
+        ActuallyMovePiece(p2Orgin, p2Destination);
+
+        Debug.Log("move finished w/o errors");
+    }//Move Pieces
+
+    int LeftOrRight(int x1, int x2)
+    {
+        if (x1 == x2)
+        {
+            return 0;
+        }
+        else if (x1 > x2)
+        {
+            return -1;     
+        }
+        else if (x1 < x2)
+        {
+            return 1;
+        }
+        else
+        {
+            Debug.Log("someting happened in left or right");
+            return 2;
+        }
+        
+
+    }
+
+    int UpOrDown(int y1, int y2)
+    {
+        if (y1 == y2)
+        {
+            return 0;
+        }
+        else if (y1 > y2)
+        {
+            return -1;
+        }
+        else if (y1 < y2)
+        {
+            return 1;
+        }
+        else
+        {
+            Debug.Log("someting happened in up or down");
+            return 2;
+        }
+    }
+
+    void CaptureCheck(Vector2 destination)
+    {
+        foreach (Piece piece in pieces)
+        {
+            if (new Vector2(piece.gameObject.transform.position.x / 3,
+                piece.gameObject.transform.position.z / 3) == destination)
+            {
+                Debug.Log("Piece captured at " + destination);
+            }
+        }
+    }
+
+    void ActuallyMovePiece(Vector2 origin, Vector2 destination)
+    {
+        foreach (Piece piece in pieces)
+        {
+            if (piece.gameObject.transform.position.x / 3 == origin.x &&
+                piece.gameObject.transform.position.z / 3 == origin.y)
+            {
+                piece.MovePieceTo(destination);
+            }
+        }
+    }
 
     void LeftClickLogic(RaycastHit hit)
     {
@@ -248,7 +382,9 @@ public class Main : MonoBehaviour
                 switch (clickedPiece.type)
                 {
                     case Piece.Type.PAWN:
-                        HighlightMoves(clickedPiece.PawnMoves(origin, clickedPiece.player, tiles, pieces));
+                        //TODO attack and enpassant 
+                        HighlightMoves(clickedPiece.PawnMoves(origin, clickedPiece.player, tiles,
+                            pieces));
                         break;
 
                     case Piece.Type.BISHOP:
@@ -257,12 +393,24 @@ public class Main : MonoBehaviour
                         break;
 
                     case Piece.Type.KNIGHT:
+                        //TODO knight logic. Once movement is fully tested I'll tackle this special guy.
+                        Debug.Log("I cant move yet!");
+                        break;
+
                     case Piece.Type.ROOK:
-                        HighlightMoves(clickedPiece.RookMoves(origin, clickedPiece.player, tiles, pieces));
+                        HighlightMoves(clickedPiece.RookMoves(origin, clickedPiece.player,
+                            tiles, pieces));
                         break;
 
                     case Piece.Type.QUEEN:
+                        HighlightMoves(clickedPiece.QueenMoves(origin, clickedPiece.player,
+                            tiles, pieces));
+                        break;
+
                     case Piece.Type.KING:
+                        HighlightMoves(clickedPiece.KingMoves(origin, clickedPiece.player,
+                            tiles, pieces));
+                        break;
 
                     default:
                         Debug.Log("Something wrong in piece type");

@@ -11,7 +11,7 @@ public class Piece
     public int player;
     public Color color;
     public bool canMove;
-    public bool active;
+    public bool active; //I think this is un Needed.
 
     public void SetPositionOneAbove(GameObject go)
     {
@@ -19,7 +19,17 @@ public class Piece
             go.transform.position.y + 1, go.transform.position.z);
     }
 
+    public void MovePieceTo(Vector2 destination)
+    {
+        gameObject.transform.position = new Vector3(destination.x * 3, 1, destination.y * 3);
+        canMove = false;
+    }
+
+    //Second Note: Starting to think that I could just passes peice type and lowered redundancy
+    //A lot here. Not sure if it would be that much better though.
+
     //NOTE TO ME POSSIBLY ADD HIGHLIGHTING HERE TO MAKE IT MORE CLEAR WHAT PIECE WAS CLICKED?
+    
     //No capture logic has been implimented yet.
     public List<Vector2> PawnMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     {
@@ -77,6 +87,8 @@ public class Piece
         return possibleMoves;
     }
 
+    //Knight Moves
+
     public List<Vector2> BishopMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     { 
         List<Vector2> possibleMoves = new List<Vector2>();
@@ -85,6 +97,21 @@ public class Piece
         possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, 1));
         possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, -1));
         possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1,- 1));
+
+        return possibleMoves;
+    }
+
+    public List<Vector2> QueenMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> possibleMoves = new List<Vector2>();
+
+        return possibleMoves;
+    }
+
+    //TODO add check check and castle.
+    public List<Vector2> KingMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> possibleMoves = new List<Vector2>();
 
         return possibleMoves;
     }
