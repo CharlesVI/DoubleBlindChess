@@ -203,7 +203,7 @@ public class Main : MonoBehaviour
         if (playerOneReady && playerTwoReady)
         {
             Debug.Log("Move called");
-            MovePieces();
+            ResolveTurn();
 
             playerOneReady = false;
             playerTwoReady = false;
@@ -223,16 +223,11 @@ public class Main : MonoBehaviour
         }
     }//GetInput
 
-    void MovePieces()
+    void ResolveTurn()
     { 
-        //This is where pieces will be moved. I think I'm going to use the line move function
-        //to go step by step (distance 1) and see where they end up. If needed for animation I'll
-        //Save the steps. Later also save the start and end points for the battle log.
-
         //Note on collisions: Peice A moves into where peice B is leaving is a collision iff
         //Piece B moving into the square Piece a is leaving as well (or has become stationary)?. 
 
-        //Honestly I feel like this needs to be cracked into at least two methods.
         //TODO clean this up into 2-3 methods instead of one big multi tasker.
         
         int p1x1 = (int)p1Origin.x;
@@ -247,11 +242,10 @@ public class Main : MonoBehaviour
         int p2y2 = (int)p2Destination.y;
         Vector2 p2Direction;
 
+
         p1Direction = new Vector2(LeftOrRight(p1x1,p1x2), UpOrDown(p1y1, p1y2));
         p2Direction = new Vector2(LeftOrRight(p2x1, p2x2), UpOrDown(p2y1, p2y2));
-
-        //Now we will step through one space at a time checking for collisions. p1 moves first
-        //effectivly this should make no diffrence but it makes a easier program
+        
         Vector2 p1Location = p1Origin;
         Vector2 p2Location = p2Orgin;
 
@@ -260,26 +254,41 @@ public class Main : MonoBehaviour
             Vector2 p1FormerLocation = p1Location;
             Vector2 p2FormerLocation = p2Location;
 
-            p1Location += p1Direction;
-            p2Location += p2Direction;
+            if (p1Location != p1Destination)
+            {
+                p1Location += p1Direction;
+            }
+
+            if (p2Location != p2Destination)
+            {
+                p2Location += p2Direction;
+            }
+
+            Debug.Log("Player 1's location is " + p1Location);
+            Debug.Log("Player 2's location is " + p2Location);
 
             if (p1Location == p2FormerLocation && p2Location == p1FormerLocation)
             { 
                 //Mid Movement collision
                 Debug.Log("Mid Movement collision detected");
             }
+
+            if (p1Location == p2Location)
+            {
+                Debug.Log("collision detected");
+                //Is the mid movement method needed?
+            }
    
         }
-        while (p1Location != p1Destination && p2Location != p2Destination);
+        while (p1Location != p1Destination || p2Location != p2Destination);
 
         CaptureCheck(p1Destination);
         CaptureCheck(p2Destination);
 
-        ActuallyMovePiece(p1Origin, p1Destination);
-        ActuallyMovePiece(p2Orgin, p2Destination);
+        MovePieces(p1Origin, p1Destination);
+        MovePieces(p2Orgin, p2Destination);
 
-        Debug.Log("move finished w/o errors");
-        Debug.Log("Log Moves Here");
+        //ebug.Log("Log Moves Here");
     }//Move Pieces
 
     int LeftOrRight(int x1, int x2)
@@ -338,7 +347,7 @@ public class Main : MonoBehaviour
         }
     }
 
-    void ActuallyMovePiece(Vector2 origin, Vector2 destination)
+    void MovePieces(Vector2 origin, Vector2 destination)
     {
         foreach (Piece piece in pieces)
         {

@@ -29,9 +29,13 @@ public class Tile
     public void Moveable()
     {
         gameObject.transform.renderer.material.color = moveableColor;
+        
+        if (occupied) { gameObject.transform.renderer.material.color = attackColor; }
+        
         moveable = true;
+        
         destination = false;
-        //Note to add attack squares just check IF OCCUPIED = ATTACK COLOR
+
     }
 
     public void Destination()
