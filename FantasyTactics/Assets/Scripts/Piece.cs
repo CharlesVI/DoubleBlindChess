@@ -104,6 +104,16 @@ public class Piece
     {
         List<Vector2> possibleMoves = new List<Vector2>();
 
+        //I dont know if this is just how it has to be or I'm not smart enough but...
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, 2, 1));
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, 2, -1));
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, -2, 1));
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, -2, -1));
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, 1, 2));
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, 1, -2));
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, -1, 2));
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces,-1, -2));
+
         return possibleMoves;
     }
 
@@ -154,179 +164,6 @@ public class Piece
         return possibleMoves;
     }
 
-    //List<Vector2> UpMoves(Vector2 position, int player,
-    //    Tile[,] tiles, Piece[] pieces, int maxDistance)
-    //{
-    //    List<Vector2> upMoves = new List<Vector2>();
-
-    //    int x = (int)position.x;
-    //    int y = (int)position.y;
-
-    //    int distance = 0;
-
-    //    for (int xx = x; xx < 8; xx++)
-    //    {
-    //        if (!tiles[xx, y].occupied)
-    //        {
-    //            upMoves.Add(new Vector2(xx, y));
-    //        }
-    //        if (tiles[xx, y].occupied)
-    //        {
-    //            foreach (Piece piece in pieces)
-    //            {
-    //                //Somewhat clear I should be using another method to store board coords
-    //                //However I sorta like that they are tied like this, I guess I could do it the
-    //                //Other way and  * 3 when I'm looking to move them... maybe later.
-    //                int pieceX = (int)piece.gameObject.transform.position.x / 3;
-    //                int pieceY = (int)piece.gameObject.transform.position.z / 3;
-
-    //                if (pieceX == xx && pieceY == y && piece.player != player)
-    //                {
-    //                    upMoves.Add(new Vector2(xx, y));
-    //                }
-    //            }
-    //            return upMoves;
-    //        }
-    //        distance++;
-    //        if (distance == maxDistance)
-    //        {
-    //            return upMoves;
-    //        }
-    //    }
-
-    //    return upMoves;
-    //}
-
-    //List<Vector2> DownMoves(Vector2 position, int player,
-    //    Tile[,] tiles, Piece[] pieces, int maxDistance)
-    //{
-    //    List<Vector2> downMoves = new List<Vector2>();
-
-    //    int x = (int)position.x;
-    //    int y = (int)position.y;
-
-    //    int distance = 0;
-
-    //    for (int xx = x; xx < -1; xx--)
-    //    {
-    //        if (!tiles[xx, y].occupied)
-    //        {
-    //            downMoves.Add(new Vector2(xx, y));
-    //        }
-    //        if (tiles[xx, y].occupied)
-    //        {
-    //            foreach (Piece piece in pieces)
-    //            {
-    //                //Somewhat clear I should be using another method to store board coords
-    //                //However I sorta like that they are tied like this, I guess I could do it the
-    //                //Other way and  * 3 when I'm looking to move them... maybe later.
-    //                int pieceX = (int)piece.gameObject.transform.position.x / 3;
-    //                int pieceY = (int)piece.gameObject.transform.position.z / 3;
-
-    //                if (pieceX == xx && pieceY == y && piece.player != player)
-    //                {
-    //                    downMoves.Add(new Vector2(xx, y));
-    //                }
-    //                return downMoves;
-    //            }
-    //        }
-
-    //        distance++;
-    //        if (distance == maxDistance)
-    //        {
-    //            return downMoves;
-    //        }
-    //    }
-
-    //    return downMoves;
-    //}
-
-    //List<Vector2> LeftMoves(Vector2 position, int player,
-    //    Tile[,] tiles, Piece[] pieces, int maxDistance)
-    //{
-    //    List<Vector2> leftMoves = new List<Vector2>();
-
-    //    int x = (int)position.x;
-    //    int y = (int)position.y;
-
-    //    int distance = 0;
-    //    for (int yy = y; yy < 0; yy--)
-    //    {
-    //        if (!tiles[x, yy].occupied)
-    //        {
-    //            leftMoves.Add(new Vector2(x, yy));
-    //        }
-    //        if (tiles[x, yy].occupied)
-    //        {
-    //            foreach (Piece piece in pieces)
-    //            {
-    //                //Somewhat clear I should be using another method to store board coords
-    //                //However I sorta like that they are tied like this, I guess I could do it the
-    //                //Other way and  * 3 when I'm looking to move them... maybe later.
-    //                int pieceX = (int)piece.gameObject.transform.position.x / 3;
-    //                int pieceY = (int)piece.gameObject.transform.position.z / 3;
-
-    //                if (pieceX == x && pieceY == yy && piece.player != player)
-    //                {
-    //                    leftMoves.Add(new Vector2(x, yy));
-    //                }
-    //            }
-    //            return leftMoves;
-    //        }
-
-    //        distance++;
-    //        if (distance == maxDistance)
-    //        {
-    //            return leftMoves;
-    //        }
-    //    }
-
-    //    return leftMoves;
-    //}
-
-    //List<Vector2> RightMoves(Vector2 position, int player,
-    //    Tile[,] tiles, Piece[] pieces, int maxDistance)
-    //{
-    //    List<Vector2> rightMoves = new List<Vector2>();
-
-    //    int x = (int)position.x;
-    //    int y = (int)position.y;
-
-    //    int distance = 0;
-    //    for (int yy = y; yy < 8; yy++)
-    //    {
-    //        if (!tiles[x, yy].occupied)
-    //        {
-    //            rightMoves.Add(new Vector2(x, yy));
-    //        }
-    //        if (tiles[x, yy].occupied)
-    //        {
-    //            foreach (Piece piece in pieces)
-    //            {
-    //                //Somewhat clear I should be using another method to store board coords
-    //                //However I sorta like that they are tied like this, I guess I could do it the
-    //                //Other way and  * 3 when I'm looking to move them... maybe later.
-    //                int pieceX = (int)piece.gameObject.transform.position.x / 3;
-    //                int pieceY = (int)piece.gameObject.transform.position.z / 3;
-
-    //                if (pieceX == x && pieceY == yy && piece.player != player)
-    //                {
-    //                    rightMoves.Add(new Vector2(x, yy));
-    //                }
-    //            }
-    //            return rightMoves;
-    //        }
-
-    //        distance++;
-    //        if (distance == maxDistance)
-    //        {
-    //            return rightMoves;
-    //        }
-    //    }
-
-    //    return rightMoves;
-    //}
-
     List<Vector2> LineMoves(Vector2 origin, int player, Tile[,] tiles,
         Piece[] pieces, int maxDistance, int xDirection, int yDirection)
     {
@@ -365,5 +202,33 @@ public class Piece
             }
         }
         return lineMoves;
+    }
+
+    List<Vector2> KnightMove(Vector2 origin, int player, Tile[,] tiles, Piece[] pieces, int xDirection, int yDirection)
+    {
+        int x = (int)origin.x + xDirection;
+        int y = (int)origin.y + yDirection;
+        Vector2 move = new Vector2(x, y);
+        List<Vector2> knightMove = new List<Vector2>();
+
+        if (x > -1 && x < 8 && y > -1 && y < 8)
+        {
+            if (!tiles[x, y].occupied)
+            {
+                knightMove.Add(move);
+            }
+
+            if (tiles[x, y].occupied)
+            {
+                foreach (Piece piece in pieces)
+                {
+                    if (piece.player != player && piece.MyCoordinates() == move)
+                    {
+                        knightMove.Add(move);
+                    }
+                }
+            }
+        }
+        return knightMove;
     }
 }

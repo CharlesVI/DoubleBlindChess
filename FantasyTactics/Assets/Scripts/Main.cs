@@ -233,17 +233,36 @@ public class Main : MonoBehaviour
         int p1y1 = (int)p1Origin.y;
         int p1y2 = (int)p1Destination.y;
         Vector2 p1Direction;
+        Piece.Type p1Type;
 
         int p2x1 = (int)p2Orgin.x;
         int p2x2 = (int)p2Destination.x;
         int p2y1 = (int)p2Orgin.y;
         int p2y2 = (int)p2Destination.y;
         Vector2 p2Direction;
+        Piece.Type p2Type;
 
+        p1Type = PieceType(p1x1, p1y1);
+        p2Type = PieceType(p2x1, p2y1);
 
-        p1Direction = new Vector2(LeftOrRight(p1x1,p1x2), UpOrDown(p1y1, p1y2));
-        p2Direction = new Vector2(LeftOrRight(p2x1, p2x2), UpOrDown(p2y1, p2y2));
-        
+        if (p1Type != Piece.Type.KNIGHT)
+        {
+            p1Direction = new Vector2(LeftOrRight(p1x1, p1x2), UpOrDown(p1y1, p1y2));
+        }
+        else
+        {
+            p1Direction = KnightDirection(p1x1, p1x2, p1y1, p1y2);
+        }
+
+        if (p2Type != Piece.Type.KNIGHT)
+        {
+            p2Direction = new Vector2(LeftOrRight(p2x1, p2x2), UpOrDown(p2y1, p2y2));
+        }
+        else 
+        {
+            p2Direction = KnightDirection(p2x1, p2x2, p2y1, p2y2);
+        }
+
         Vector2 p1Location = p1Origin;
         Vector2 p2Location = p2Orgin;
 
@@ -252,20 +271,59 @@ public class Main : MonoBehaviour
             Vector2 p1FormerLocation = p1Location;
             Vector2 p2FormerLocation = p2Location;
 
-            if (p1Location != p1Destination)
+            if (p1Location != p1Destination && p1Type != Piece.Type.KNIGHT)
             {
                 p1Location += p1Direction;
             }
+            else if(p1Type == Piece.Type.KNIGHT)
+            {
+                if (p1Direction.x == 0 && p1Location.y != p1Destination.y)
+                {
+                    p1Location += p1Direction;
+                }
+                else if (p1Location.y == p1Destination.y)
+                {
+                    p1Location = p1Destination;
+                }
+                if (p1Direction.y == 0 && p1Location.x != p1Destination.x)
+                {
+                    p1Location += p1Direction;
+                }
+                else if (p1Location.x == p1Destination.x)
+                {
+                    p1Location = p1Destination;
+                }
+            }
 
-            if (p2Location != p2Destination)
+            if (p2Location != p2Destination && p2Type != Piece.Type.KNIGHT)
             {
                 p2Location += p2Direction;
             }
+            else if(p2Type == Piece.Type.KNIGHT)
+            {
+                if (p2Direction.x == 0 && p2Location.y != p2Destination.y)
+                {
+                    p2Location += p2Direction;
+                }
+                else if (p2Location.y == p2Destination.y)
+                {
+                    p2Location = p2Destination;
+                }
+                if (p2Direction.y == 0 && p2Location.x != p2Destination.x)
+                {
+                    p2Location += p2Direction;
+                }
+                else if (p2Location.x == p2Destination.x)
+                {
+                    p2Location = p2Destination;
+                }
+            }
 
             if (p1Location == p2FormerLocation && p2Location == p1FormerLocation)
-            { 
+            {
                 //Mid Movement collision
                 Debug.Log("Mid Movement collision detected");
+                Debug.Log("Player 1 Location " + p1Location + " Player 2 location " + p2Location);
                 CapturePiece(p1Location);
                 CapturePiece(p2Location);
             }
@@ -275,9 +333,10 @@ public class Main : MonoBehaviour
                 Debug.Log("collision detected");
                 //Is the mid movement method needed?
             }
-   
+
         }
         while (p1Location != p1Destination || p2Location != p2Destination);
+        
 
         CaptureCheck(p1Destination);
         CaptureCheck(p2Destination);
@@ -285,8 +344,56 @@ public class Main : MonoBehaviour
         MovePieces(p1Origin, p1Destination);
         MovePieces(p2Orgin, p2Destination);
 
-        //ebug.Log("Log Moves Here");
+        Debug.Log("Log Moves Here");
     }//Move Pieces
+
+    Piece.Type PieceType(int x, int y)
+    {
+        foreach (Piece piece in pieces)
+        {
+            if (piece.MyCoordinates().x == x && piece.MyCoordinates().y == y)
+            {
+                return piece.type;
+            }
+        }
+
+        Debug.Log("This should not happen!");
+        return Piece.Type.KING;
+    }
+
+    Vector2 KnightDirection(int x1, int x2, int y1, int y2)
+    {
+        Vector2 direction = new Vector2();
+
+        float dY = Mathf.Abs(y2 - y1);
+        float dX = Mathf.Abs(x2 - x1);
+
+        if (dY > dX)
+        {
+            if (y1 > y2)
+            {
+                direction = new Vector2(0, -1);
+            }
+            else if (y1 < y2)
+            {
+                direction = new Vector2(0, 1);
+            }
+        }
+        else if (dX > dY)
+        {
+            if (x1 > x2)
+            {
+                direction = new Vector2(-1, 0);
+            }
+            else if (x1 < x2)
+            {
+                direction = new Vector2(1, 0);
+            }
+        
+        }
+
+        return direction;
+    }
 
     int LeftOrRight(int x1, int x2)
     {
@@ -425,8 +532,8 @@ public class Main : MonoBehaviour
                         break;
 
                     case Piece.Type.KNIGHT:
-                        //TODO knight logic. Once movement is fully tested I'll tackle this special guy.
-                        Debug.Log("I cant move yet!");
+                        HighlightMoves(clickedPiece.KnightMoves(origin, clickedPiece.player,
+                            tiles, pieces));
                         break;
 
                     case Piece.Type.ROOK:
