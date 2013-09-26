@@ -26,25 +26,18 @@ public class Piece
             go.transform.position.y + 1, go.transform.position.z);
     }
 
-    public void AssignType(Type type)
-    {
-        type = this.type;
-
-        switch (type)
-        { 
-            case Piece.Type.PAWN:
-                Renderer child = gameObject.GetComponentInChildren<Renderer>();
-                
-                //child.renderer.material = 
-                break;
-        }
-
-    }
-
     public void MovePieceTo(Vector2 destination)
     {
         gameObject.transform.position = new Vector3(destination.x * 3, 1, destination.y * 3);
         canMove = false;
+    }
+
+    public Vector2 MyCoordinates()
+    {
+        Vector2 location = new Vector2(gameObject.transform.position.x /
+            3, gameObject.transform.position.z / 3);
+
+        return location;
     }
 
     //Second Note: Starting to think that I could just passes peice type and lowered redundancy

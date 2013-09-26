@@ -35,7 +35,6 @@ public class Tile
         moveable = true;
         
         destination = false;
-
     }
 
     public void Destination()

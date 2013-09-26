@@ -194,8 +194,6 @@ public class Main : MonoBehaviour
         return piece;
     }
 
-       
-
     // Update is called once per frame
     void Update()
     {
@@ -203,7 +201,6 @@ public class Main : MonoBehaviour
 
         if (playerOneReady && playerTwoReady)
         {
-            Debug.Log("Move called");
             ResolveTurn();
 
             playerOneReady = false;
@@ -265,13 +262,12 @@ public class Main : MonoBehaviour
                 p2Location += p2Direction;
             }
 
-            Debug.Log("Player 1's location is " + p1Location);
-            Debug.Log("Player 2's location is " + p2Location);
-
             if (p1Location == p2FormerLocation && p2Location == p1FormerLocation)
             { 
                 //Mid Movement collision
                 Debug.Log("Mid Movement collision detected");
+                CapturePiece(p1Location);
+                CapturePiece(p2Location);
             }
 
             if (p1Location == p2Location)
@@ -338,12 +334,13 @@ public class Main : MonoBehaviour
 
     void CaptureCheck(Vector2 destination)
     {
+
         foreach (Piece piece in pieces)
         {
-            if (new Vector2(piece.gameObject.transform.position.x / 3,
-                piece.gameObject.transform.position.z / 3) == destination)
+            if (piece.MyCoordinates() == destination)
             {
                 Debug.Log("Piece captured at " + destination);
+                CapturePiece(destination);
             }
         }
     }
@@ -362,8 +359,19 @@ public class Main : MonoBehaviour
         tiles[(int)destination.x, (int)destination.y].occupied = true;
     }
 
-    void CapturePiece()
-    { }
+    void CapturePiece(Vector2 location)
+    {
+        foreach (Piece piece in pieces)
+        {
+            if (piece.MyCoordinates() == location)
+            {
+                //I dont think I need to move it technically but you never know.
+                piece.gameObject.transform.position = new Vector3(0, -10, 0);
+                piece.gameObject.SetActive(false);
+                Debug.Log("TODO log the capture");
+            }
+        }
+    }
 
     void LeftClickLogic(RaycastHit hit)
     {
@@ -373,8 +381,6 @@ public class Main : MonoBehaviour
         if (hit.collider.gameObject.tag == tagPiece)
         {
             Piece clickedPiece = new Piece();
-
-            Clear();
             
             //Find out what kind of piece I clicked in the list of pieces that exist.
             foreach (Piece piece in pieces)
@@ -387,8 +393,18 @@ public class Main : MonoBehaviour
             }
 
             //Make sure the piece is owned by the player.
+            if (clickedPiece.player != whatPlayerAmI)
+            { 
+                int x = (int)clickedPiece.gameObject.transform.position.x / 3;
+                int y = (int)clickedPiece.gameObject.transform.position.z / 3;
+
+                clickTile(x, y);
+            }
+
             if (clickedPiece.player == whatPlayerAmI)
             {
+                Clear();
+
                 //Presently this could be converted into a vector2 from what I see. really should stop using world
                 //coords as board ones... lots of /3 errors.
                 Vector3 position = clickedPiece.gameObject.transform.position;
@@ -438,31 +454,44 @@ public class Main : MonoBehaviour
 
         if (hit.collider.gameObject.tag == tagTile)
         {
-            Tile selectedTile = new Tile();
+            
 
             int x = (int)hit.collider.gameObject.transform.position.x / 3;
             int y = (int)hit.collider.gameObject.transform.position.z / 3;
 
-            selectedTile = tiles[x, y];
-
-            //If its a blue tile set it as the intended destination and clear any other
-            //possible destination
-            if (selectedTile.moveable)
-            {
-                foreach (Tile tile in tiles)
-                {
-                    if (tile.destination)
-                    {
-                        tile.Moveable();
-                    }
-                }
-
-                selectedTile.Destination();
-                destination = new Vector2(x, y);
-                readyToMove = true;
-            }           
+            clickTile(x, y);
+                       
         }
     }//Left Click Logic
+
+    public void clickTile(int x, int y)
+    {
+        //This is so we can click "through" a piece if needed. I'm passing coords not
+        //Tiles[] just cuz. can change later if needed.
+
+        Tile selectedTile = new Tile();
+
+        selectedTile = tiles[x, y];
+
+        //If its a blue tile set it as the intended destination and clear any other
+        //possible destination
+        if (selectedTile.moveable)
+        {
+            foreach (Tile tile in tiles)
+            {
+                if (tile.destination)
+                {
+                    tile.Moveable();
+                }
+            }
+
+            selectedTile.Destination();
+            destination = new Vector2(x, y);
+            readyToMove = true;
+        }
+
+
+    }
 
     public void HighlightMoves(List<Vector2> moveList)
     {
