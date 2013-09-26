@@ -11,7 +11,13 @@ public class Main : MonoBehaviour
     public GameObject tile;
     Tile[,] tiles = new Tile[8, 8];
 
-    public GameObject pieceGO;
+    public GameObject piecePawn;
+    public GameObject pieceBishop;
+    public GameObject pieceRook;
+    public GameObject pieceKnight;
+    public GameObject pieceQueen;
+    public GameObject pieceKing;
+
     Piece[] pieces = new Piece[32];
    
     Ray ray;
@@ -74,11 +80,39 @@ public class Main : MonoBehaviour
     /// </summary>
     void SetupPieces()
     {
+        for (int ii = 0; ii < 8; ii++)
+        {
+            pieces[ii] = DeclarePiece(Piece.Type.PAWN, ii, 6);        
+        }
+
+        //Ugh
+        pieces[8] = DeclarePiece(Piece.Type.ROOK, 0, 7);
+        pieces[9] = DeclarePiece(Piece.Type.ROOK, 7, 7);
+        pieces[10] = DeclarePiece(Piece.Type.KNIGHT, 1, 7);
+        pieces[11] = DeclarePiece(Piece.Type.KNIGHT, 6, 7);
+        pieces[12] = DeclarePiece(Piece.Type.BISHOP, 5, 7);
+        pieces[13] = DeclarePiece(Piece.Type.BISHOP, 2, 7);
+        pieces[14] = DeclarePiece(Piece.Type.QUEEN, 3, 7);
+        pieces[15] = DeclarePiece(Piece.Type.KING, 4, 7);
+
+
+        pieces[24] = DeclarePiece(Piece.Type.ROOK, 0, 0);
+        pieces[25] = DeclarePiece(Piece.Type.ROOK, 7, 0);
+        pieces[26] = DeclarePiece(Piece.Type.KNIGHT, 1, 0);
+        pieces[27] = DeclarePiece(Piece.Type.KNIGHT, 6, 0);
+        pieces[28] = DeclarePiece(Piece.Type.BISHOP, 5, 0);
+        pieces[29] = DeclarePiece(Piece.Type.BISHOP, 2, 0);
+        pieces[30] = DeclarePiece(Piece.Type.QUEEN, 3, 0);
+        pieces[31] = DeclarePiece(Piece.Type.KING, 4, 0);
+
+        for(int ii = 0; ii < 8; ii++)
+        {
+            pieces[ii + 16] = DeclarePiece(Piece.Type.PAWN, ii, 1);
+        }
+
         for (int ii = 0; ii < 32; ii++)
-        { 
-            pieces[ii] = new Piece();
-            pieces[ii].gameObject = (GameObject)Instantiate(pieceGO, new Vector3(0, 0, 0), Quaternion.identity);
-            pieces[ii].gameObject.name = "Piece " + ii;
+        {
+            pieces[ii].gameObject.name = "Piece" + ii;
 
             if(ii < 16)
             {
@@ -104,95 +138,62 @@ public class Main : MonoBehaviour
                 //Debug.Log(xx + "," + yy + " set to occupied");
                 tiles[xx, yy].occupied = true;
             }
-
-        //If I run this the other way around I can set occupied to false as well. Or I could just handle that
-        //as a part of the movement procedure. No idea what would be more cost effective or reliable.
-
-
-        
-        //At this point I'm just going to maunally set the pieces up. Either it will always be this set up or some level of custom work will be involved and i'll loop through a list per player.
-        
-        //Player 1 This really should be a list. However there have been issues with lists interacting
-        //refrencing all one thing and i'm comfortable with the array.
-        int nn = 0;
-        pieces[nn].SetPositionOneAbove(tiles[7, 7].gameObject);
-        pieces[nn].type = Piece.Type.ROOK;
-        nn++;
-
-        pieces[nn].SetPositionOneAbove(tiles[6, 7].gameObject);
-        pieces[nn].type = Piece.Type.KNIGHT;
-        nn++;
-
-        pieces[nn].SetPositionOneAbove(tiles[5, 7].gameObject);
-        pieces[nn].type = Piece.Type.BISHOP;
-        nn++;
-
-        pieces[nn].SetPositionOneAbove(tiles[4, 7].gameObject);
-        pieces[nn].type = Piece.Type.KING;
-        nn++;
-
-        pieces[nn].SetPositionOneAbove(tiles[3, 7].gameObject);
-        pieces[nn].type = Piece.Type.QUEEN;
-        nn++;
-
-        pieces[nn].SetPositionOneAbove(tiles[2, 7].gameObject);
-        pieces[nn].type = Piece.Type.BISHOP;
-        nn++;
-
-        pieces[nn].SetPositionOneAbove(tiles[1, 7].gameObject);
-        pieces[nn].type = Piece.Type.KNIGHT;
-        nn++;
-
-        pieces[nn].SetPositionOneAbove(tiles[0, 7].gameObject);
-        pieces[nn].type = Piece.Type.ROOK;
-        nn++;
-
-        for(int ii = 0; ii < 8; ii ++)
-        {
-            pieces[nn].SetPositionOneAbove(tiles[ii, 6].gameObject);
-            pieces[nn].type = Piece.Type.PAWN;
-            nn++;
-        }
-
-        pieces[nn].SetPositionOneAbove(tiles[7, 0].gameObject);
-        pieces[nn].type = Piece.Type.ROOK;
-        nn++;
-
-        pieces[nn].SetPositionOneAbove(tiles[6, 0].gameObject);
-        pieces[nn].type = Piece.Type.KNIGHT;
-        nn++;
-
-        pieces[nn].SetPositionOneAbove(tiles[5, 0].gameObject);
-        pieces[nn].type = Piece.Type.BISHOP;
-        nn++;
-
-        pieces[nn].SetPositionOneAbove(tiles[4, 0].gameObject);
-        pieces[nn].type = Piece.Type.KING;
-        nn++;
-
-        pieces[nn].SetPositionOneAbove(tiles[3, 0].gameObject);
-        pieces[nn].type = Piece.Type.QUEEN;
-        nn++;
-
-        pieces[nn].SetPositionOneAbove(tiles[2, 0].gameObject);
-        pieces[nn].type = Piece.Type.BISHOP;
-        nn++;
-
-        pieces[nn].SetPositionOneAbove(tiles[1, 0].gameObject);
-        pieces[nn].type = Piece.Type.KNIGHT;
-        nn++;
-
-        pieces[nn].SetPositionOneAbove(tiles[0, 0].gameObject);
-        pieces[nn].type = Piece.Type.ROOK;
-        nn++;
-
-        for (int ii = 0; ii < 8; ii++)
-        {
-            pieces[nn].SetPositionOneAbove(tiles[ii, 1].gameObject);
-            pieces[nn].type = Piece.Type.PAWN;
-            nn++;
-        }
     }
+
+    public Piece DeclarePiece(Piece.Type type, int x, int y)
+    { 
+        Piece piece = new Piece();
+
+        switch (type)
+        {
+            case Piece.Type.PAWN:
+
+                piece.gameObject = (GameObject)Instantiate(piecePawn, Vector3.zero, Quaternion.identity);
+                piece.type = Piece.Type.PAWN;  
+          
+                break;
+
+            case Piece.Type.BISHOP:
+
+                piece.gameObject = (GameObject)Instantiate(pieceBishop, Vector3.zero, Quaternion.identity);
+                piece.type = Piece.Type.BISHOP;
+
+                break;
+
+            case Piece.Type.KNIGHT:
+
+                piece.gameObject = (GameObject)Instantiate(pieceKnight, Vector3.zero, Quaternion.identity);
+                piece.type = Piece.Type.KNIGHT;
+
+                break;
+
+            case Piece.Type.ROOK:
+
+                piece.gameObject = (GameObject)Instantiate(pieceRook, Vector3.zero, Quaternion.identity);
+                piece.type = Piece.Type.ROOK;
+
+                break;
+
+            case Piece.Type.QUEEN:
+
+                piece.gameObject = (GameObject)Instantiate(pieceQueen, Vector3.zero, Quaternion.identity);
+                piece.type = Piece.Type.QUEEN;
+
+                break;
+
+            case Piece.Type.KING:
+
+                piece.gameObject = (GameObject)Instantiate(pieceKing, Vector3.zero, Quaternion.identity);
+                piece.type = Piece.Type.KING;
+
+                break;
+        }
+
+        piece.SetPositionOneAbove(tiles[x,y].gameObject);
+
+        return piece;
+    }
+
        
 
     // Update is called once per frame

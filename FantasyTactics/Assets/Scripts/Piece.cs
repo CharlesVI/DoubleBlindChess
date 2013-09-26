@@ -13,17 +13,32 @@ public class Piece
     public bool canMove;
     public bool active; //I think this is un Needed.
 
+    public Material pawn;
+    public Material rook;
+    public Material knight;
+    public Material bishop;
+    public Material queen;
+    public Material king;
+
     public void SetPositionOneAbove(GameObject go)
     {
         this.gameObject.transform.position = new Vector3(go.transform.position.x,
             go.transform.position.y + 1, go.transform.position.z);
     }
 
-    public void AssignTypeColorPlayer(Type type, Color color, int player)
+    public void AssignType(Type type)
     {
         type = this.type;
-        color = this.color;
-        player = this.player;
+
+        switch (type)
+        { 
+            case Piece.Type.PAWN:
+                Renderer child = gameObject.GetComponentInChildren<Renderer>();
+                
+                //child.renderer.material = 
+                break;
+        }
+
     }
 
     public void MovePieceTo(Vector2 destination)
