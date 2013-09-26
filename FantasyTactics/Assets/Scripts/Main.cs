@@ -361,6 +361,9 @@ public class Main : MonoBehaviour
         tiles[(int)destination.x, (int)destination.y].occupied = true;
     }
 
+    void CapturePiece()
+    { }
+
     void LeftClickLogic(RaycastHit hit)
     {
         string tagPiece = "Piece";
@@ -518,6 +521,7 @@ public class Main : MonoBehaviour
         }
         Clear();
     }
+
     public void AbortMove()
     {
         Clear();

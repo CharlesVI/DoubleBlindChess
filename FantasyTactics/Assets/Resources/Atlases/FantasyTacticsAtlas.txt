@@ -1,107 +1,51 @@
 {"frames": {
 
-"BlueTileBorder.png":
+"Bishop.png":
 {
-	"frame": {"x":2,"y":392,"w":128,"h":128},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
-	"sourceSize": {"w":128,"h":128}
-},
-"DesertTile.png":
-{
-	"frame": {"x":262,"y":262,"w":128,"h":128},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
-	"sourceSize": {"w":128,"h":128}
-},
-"ForestTile.png":
-{
-	"frame": {"x":132,"y":262,"w":128,"h":128},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
-	"sourceSize": {"w":128,"h":128}
-},
-"HighlightedDesertTile.png":
-{
-	"frame": {"x":2,"y":262,"w":128,"h":128},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
-	"sourceSize": {"w":128,"h":128}
-},
-"HighlightedForestTile.png":
-{
-	"frame": {"x":262,"y":132,"w":128,"h":128},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
-	"sourceSize": {"w":128,"h":128}
-},
-"HighlightedMountainTile.png":
-{
-	"frame": {"x":132,"y":132,"w":128,"h":128},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
-	"sourceSize": {"w":128,"h":128}
-},
-"HighlightedSwampTile.png":
-{
-	"frame": {"x":2,"y":132,"w":128,"h":128},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
-	"sourceSize": {"w":128,"h":128}
-},
-"MeleeUnit.png":
-{
-	"frame": {"x":376,"y":392,"w":120,"h":124},
+	"frame": {"x":122,"y":234,"w":118,"h":114},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":5,"y":2,"w":120,"h":124},
+	"spriteSourceSize": {"x":6,"y":6,"w":118,"h":114},
 	"sourceSize": {"w":128,"h":128}
 },
-"MountainTile.png":
+"King.png":
 {
-	"frame": {"x":262,"y":2,"w":128,"h":128},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
-	"sourceSize": {"w":128,"h":128}
-},
-"RangedUnit.png":
-{
-	"frame": {"x":254,"y":392,"w":120,"h":124},
+	"frame": {"x":2,"y":234,"w":118,"h":114},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":5,"y":2,"w":120,"h":124},
+	"spriteSourceSize": {"x":6,"y":6,"w":118,"h":114},
 	"sourceSize": {"w":128,"h":128}
 },
-"ReconUnit.png":
+"Knight.png":
 {
-	"frame": {"x":132,"y":392,"w":120,"h":124},
+	"frame": {"x":122,"y":118,"w":118,"h":114},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":5,"y":2,"w":120,"h":124},
+	"spriteSourceSize": {"x":6,"y":6,"w":118,"h":114},
 	"sourceSize": {"w":128,"h":128}
 },
-"RedTileBorder.png":
+"Pawn.png":
 {
-	"frame": {"x":132,"y":2,"w":128,"h":128},
+	"frame": {"x":2,"y":118,"w":118,"h":114},
 	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":6,"w":118,"h":114},
 	"sourceSize": {"w":128,"h":128}
 },
-"SwampTile.png":
+"Queen.png":
 {
-	"frame": {"x":2,"y":2,"w":128,"h":128},
+	"frame": {"x":122,"y":2,"w":118,"h":114},
 	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":6,"w":118,"h":114},
+	"sourceSize": {"w":128,"h":128}
+},
+"Rook.png":
+{
+	"frame": {"x":2,"y":2,"w":118,"h":114},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":6,"w":118,"h":114},
 	"sourceSize": {"w":128,"h":128}
 }},
 "meta": {
@@ -109,8 +53,8 @@
 	"version": "1.0",
 	"image": "FantasyTacticsAtlas.png",
 	"format": "RGBA8888",
-	"size": {"w":512,"h":1024},
+	"size": {"w":256,"h":512},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:8e8116aae540ec965c1ddf260544e0c3:1/1$"
+	"smartupdate": "$TexturePacker:SmartUpdate:5e89483af51033761f2b6e24ab7a6aaf:1/1$"
 }
 }

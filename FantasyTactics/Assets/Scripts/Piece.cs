@@ -6,7 +6,7 @@ using System;
 public class Piece
 {
     public GameObject gameObject;
-    public enum Type {PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING };
+    public enum Type { PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING };
     public Type type;
     public int player;
     public Color color;
@@ -19,6 +19,13 @@ public class Piece
             go.transform.position.y + 1, go.transform.position.z);
     }
 
+    public void AssignTypeColorPlayer(Type type, Color color, int player)
+    {
+        type = this.type;
+        color = this.color;
+        player = this.player;
+    }
+
     public void MovePieceTo(Vector2 destination)
     {
         gameObject.transform.position = new Vector3(destination.x * 3, 1, destination.y * 3);
@@ -29,7 +36,7 @@ public class Piece
     //A lot here. Not sure if it would be that much better though.
 
     //NOTE TO ME POSSIBLY ADD HIGHLIGHTING HERE TO MAKE IT MORE CLEAR WHAT PIECE WAS CLICKED?
-    
+
     //No capture logic has been implimented yet.
     public List<Vector2> PawnMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     {
@@ -47,12 +54,12 @@ public class Piece
             {
                 possibleMoves.Add(new Vector2(x, y + 1));
 
-                if (y == 1 && !tiles[x, y+2].occupied)
+                if (y == 1 && !tiles[x, y + 2].occupied)
                 {
                     possibleMoves.Add(new Vector2(x, y + 2));
                 }
             }
-                
+
         }
 
         if (player == 2)
@@ -66,9 +73,9 @@ public class Piece
                     possibleMoves.Add(new Vector2(x, y - 2));
                 }
             }
-            
+
         }
-        
+
         return possibleMoves;
     }
 
@@ -93,13 +100,13 @@ public class Piece
     }
 
     public List<Vector2> BishopMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
-    { 
+    {
         List<Vector2> possibleMoves = new List<Vector2>();
 
         possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, 1));
         possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, 1));
         possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, -1));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1,- 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, -1));
 
         return possibleMoves;
     }
@@ -139,178 +146,178 @@ public class Piece
         return possibleMoves;
     }
 
-    List<Vector2> UpMoves(Vector2 position, int player,
-        Tile[,] tiles, Piece[] pieces, int maxDistance)
-    {
-        List<Vector2> upMoves = new List<Vector2>();
+    //List<Vector2> UpMoves(Vector2 position, int player,
+    //    Tile[,] tiles, Piece[] pieces, int maxDistance)
+    //{
+    //    List<Vector2> upMoves = new List<Vector2>();
 
-        int x = (int)position.x;
-        int y = (int)position.y;
+    //    int x = (int)position.x;
+    //    int y = (int)position.y;
 
-        int distance = 0;
+    //    int distance = 0;
 
-        for (int xx = x; xx < 8; xx++)
-        {
-            if (!tiles[xx, y].occupied)
-            {
-                upMoves.Add(new Vector2(xx, y));
-            }
-            if (tiles[xx, y].occupied)
-            {
-                foreach (Piece piece in pieces)
-                {
-                    //Somewhat clear I should be using another method to store board coords
-                    //However I sorta like that they are tied like this, I guess I could do it the
-                    //Other way and  * 3 when I'm looking to move them... maybe later.
-                    int pieceX = (int)piece.gameObject.transform.position.x / 3;
-                    int pieceY = (int)piece.gameObject.transform.position.z / 3;
+    //    for (int xx = x; xx < 8; xx++)
+    //    {
+    //        if (!tiles[xx, y].occupied)
+    //        {
+    //            upMoves.Add(new Vector2(xx, y));
+    //        }
+    //        if (tiles[xx, y].occupied)
+    //        {
+    //            foreach (Piece piece in pieces)
+    //            {
+    //                //Somewhat clear I should be using another method to store board coords
+    //                //However I sorta like that they are tied like this, I guess I could do it the
+    //                //Other way and  * 3 when I'm looking to move them... maybe later.
+    //                int pieceX = (int)piece.gameObject.transform.position.x / 3;
+    //                int pieceY = (int)piece.gameObject.transform.position.z / 3;
 
-                    if (pieceX == xx && pieceY == y && piece.player != player)
-                    {
-                        upMoves.Add(new Vector2(xx, y));
-                    }
-                }
-                return upMoves;
-            }
-            distance++;
-            if (distance == maxDistance)
-            { 
-                return upMoves;
-            }
-        }
+    //                if (pieceX == xx && pieceY == y && piece.player != player)
+    //                {
+    //                    upMoves.Add(new Vector2(xx, y));
+    //                }
+    //            }
+    //            return upMoves;
+    //        }
+    //        distance++;
+    //        if (distance == maxDistance)
+    //        {
+    //            return upMoves;
+    //        }
+    //    }
 
-        return upMoves;
-    }
+    //    return upMoves;
+    //}
 
-    List<Vector2> DownMoves(Vector2 position, int player,
-        Tile[,] tiles, Piece[] pieces, int maxDistance)
-    {
-        List<Vector2> downMoves = new List<Vector2>();
+    //List<Vector2> DownMoves(Vector2 position, int player,
+    //    Tile[,] tiles, Piece[] pieces, int maxDistance)
+    //{
+    //    List<Vector2> downMoves = new List<Vector2>();
 
-        int x = (int)position.x;
-        int y = (int)position.y;
+    //    int x = (int)position.x;
+    //    int y = (int)position.y;
 
-        int distance = 0;
+    //    int distance = 0;
 
-        for (int xx = x; xx < -1; xx--)
-        {
-            if (!tiles[xx, y].occupied)
-            {
-                downMoves.Add(new Vector2(xx, y));
-            }
-            if (tiles[xx, y].occupied)
-            {
-                foreach (Piece piece in pieces)
-                {
-                    //Somewhat clear I should be using another method to store board coords
-                    //However I sorta like that they are tied like this, I guess I could do it the
-                    //Other way and  * 3 when I'm looking to move them... maybe later.
-                    int pieceX = (int)piece.gameObject.transform.position.x / 3;
-                    int pieceY = (int)piece.gameObject.transform.position.z / 3;
+    //    for (int xx = x; xx < -1; xx--)
+    //    {
+    //        if (!tiles[xx, y].occupied)
+    //        {
+    //            downMoves.Add(new Vector2(xx, y));
+    //        }
+    //        if (tiles[xx, y].occupied)
+    //        {
+    //            foreach (Piece piece in pieces)
+    //            {
+    //                //Somewhat clear I should be using another method to store board coords
+    //                //However I sorta like that they are tied like this, I guess I could do it the
+    //                //Other way and  * 3 when I'm looking to move them... maybe later.
+    //                int pieceX = (int)piece.gameObject.transform.position.x / 3;
+    //                int pieceY = (int)piece.gameObject.transform.position.z / 3;
 
-                    if (pieceX == xx && pieceY == y && piece.player != player)
-                    {
-                        downMoves.Add(new Vector2(xx, y));
-                    }
-                    return downMoves;
-                }
-            }
+    //                if (pieceX == xx && pieceY == y && piece.player != player)
+    //                {
+    //                    downMoves.Add(new Vector2(xx, y));
+    //                }
+    //                return downMoves;
+    //            }
+    //        }
 
-            distance++;
-            if (distance == maxDistance)
-            {
-                return downMoves;
-            }
-        }
+    //        distance++;
+    //        if (distance == maxDistance)
+    //        {
+    //            return downMoves;
+    //        }
+    //    }
 
-        return downMoves;
-    }
+    //    return downMoves;
+    //}
 
-    List<Vector2> LeftMoves(Vector2 position, int player,
-        Tile[,] tiles, Piece[] pieces, int maxDistance)
-    {
-        List<Vector2> leftMoves = new List<Vector2>();
+    //List<Vector2> LeftMoves(Vector2 position, int player,
+    //    Tile[,] tiles, Piece[] pieces, int maxDistance)
+    //{
+    //    List<Vector2> leftMoves = new List<Vector2>();
 
-        int x = (int)position.x;
-        int y = (int)position.y;
+    //    int x = (int)position.x;
+    //    int y = (int)position.y;
 
-        int distance = 0;
-        for (int yy = y; yy < 0; yy--)
-        {
-            if (!tiles[x, yy].occupied)
-            {
-                leftMoves.Add(new Vector2(x, yy));
-            }
-            if (tiles[x, yy].occupied)
-            {
-                foreach (Piece piece in pieces)
-                {
-                    //Somewhat clear I should be using another method to store board coords
-                    //However I sorta like that they are tied like this, I guess I could do it the
-                    //Other way and  * 3 when I'm looking to move them... maybe later.
-                    int pieceX = (int)piece.gameObject.transform.position.x / 3;
-                    int pieceY = (int)piece.gameObject.transform.position.z / 3;
+    //    int distance = 0;
+    //    for (int yy = y; yy < 0; yy--)
+    //    {
+    //        if (!tiles[x, yy].occupied)
+    //        {
+    //            leftMoves.Add(new Vector2(x, yy));
+    //        }
+    //        if (tiles[x, yy].occupied)
+    //        {
+    //            foreach (Piece piece in pieces)
+    //            {
+    //                //Somewhat clear I should be using another method to store board coords
+    //                //However I sorta like that they are tied like this, I guess I could do it the
+    //                //Other way and  * 3 when I'm looking to move them... maybe later.
+    //                int pieceX = (int)piece.gameObject.transform.position.x / 3;
+    //                int pieceY = (int)piece.gameObject.transform.position.z / 3;
 
-                    if (pieceX == x && pieceY == yy && piece.player != player)
-                    {
-                        leftMoves.Add(new Vector2(x, yy));
-                    }
-                }
-                return leftMoves;
-            }
+    //                if (pieceX == x && pieceY == yy && piece.player != player)
+    //                {
+    //                    leftMoves.Add(new Vector2(x, yy));
+    //                }
+    //            }
+    //            return leftMoves;
+    //        }
 
-            distance++;
-            if (distance == maxDistance)
-            {
-                return leftMoves;
-            }
-        }
+    //        distance++;
+    //        if (distance == maxDistance)
+    //        {
+    //            return leftMoves;
+    //        }
+    //    }
 
-        return leftMoves;
-    }
+    //    return leftMoves;
+    //}
 
-    List<Vector2> RightMoves(Vector2 position, int player,
-        Tile[,] tiles, Piece[] pieces, int maxDistance)
-    {
-        List<Vector2> rightMoves = new List<Vector2>();
+    //List<Vector2> RightMoves(Vector2 position, int player,
+    //    Tile[,] tiles, Piece[] pieces, int maxDistance)
+    //{
+    //    List<Vector2> rightMoves = new List<Vector2>();
 
-        int x = (int)position.x;
-        int y = (int)position.y;
+    //    int x = (int)position.x;
+    //    int y = (int)position.y;
 
-        int distance = 0;
-        for (int yy = y; yy < 8; yy++)
-        {
-            if (!tiles[x, yy].occupied)
-            {
-                rightMoves.Add(new Vector2(x, yy));
-            }
-            if (tiles[x, yy].occupied)
-            {
-                foreach (Piece piece in pieces)
-                {
-                    //Somewhat clear I should be using another method to store board coords
-                    //However I sorta like that they are tied like this, I guess I could do it the
-                    //Other way and  * 3 when I'm looking to move them... maybe later.
-                    int pieceX = (int)piece.gameObject.transform.position.x / 3;
-                    int pieceY = (int)piece.gameObject.transform.position.z / 3;
+    //    int distance = 0;
+    //    for (int yy = y; yy < 8; yy++)
+    //    {
+    //        if (!tiles[x, yy].occupied)
+    //        {
+    //            rightMoves.Add(new Vector2(x, yy));
+    //        }
+    //        if (tiles[x, yy].occupied)
+    //        {
+    //            foreach (Piece piece in pieces)
+    //            {
+    //                //Somewhat clear I should be using another method to store board coords
+    //                //However I sorta like that they are tied like this, I guess I could do it the
+    //                //Other way and  * 3 when I'm looking to move them... maybe later.
+    //                int pieceX = (int)piece.gameObject.transform.position.x / 3;
+    //                int pieceY = (int)piece.gameObject.transform.position.z / 3;
 
-                    if (pieceX == x && pieceY == yy && piece.player != player)
-                    {
-                        rightMoves.Add(new Vector2(x, yy));
-                    }
-                }
-                return rightMoves;
-            }
+    //                if (pieceX == x && pieceY == yy && piece.player != player)
+    //                {
+    //                    rightMoves.Add(new Vector2(x, yy));
+    //                }
+    //            }
+    //            return rightMoves;
+    //        }
 
-            distance++;
-            if (distance == maxDistance)
-            {
-                return rightMoves;
-            }
-        }
+    //        distance++;
+    //        if (distance == maxDistance)
+    //        {
+    //            return rightMoves;
+    //        }
+    //    }
 
-        return rightMoves;
-    }
+    //    return rightMoves;
+    //}
 
     List<Vector2> LineMoves(Vector2 origin, int player, Tile[,] tiles,
         Piece[] pieces, int maxDistance, int xDirection, int yDirection)
