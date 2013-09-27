@@ -45,6 +45,21 @@ public class Main : MonoBehaviour
         SetupPieces();
 	}
 
+    // Update is called once per frame
+    void Update()
+    {
+        GetInput();
+
+        if (playerOneReady && playerTwoReady)
+        {
+            ResolveTurn();
+            UpdateTileOccupation();
+
+            playerOneReady = false;
+            playerTwoReady = false;
+        }
+
+	}
 	void SetupBoard()
     {
         for (int xx = 0; xx < maxX; xx++) for (int yy = 0; yy < maxY; yy++)
@@ -194,19 +209,7 @@ public class Main : MonoBehaviour
         return piece;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        GetInput();
 
-        if (playerOneReady && playerTwoReady)
-        {
-            ResolveTurn();
-
-            playerOneReady = false;
-            playerTwoReady = false;
-        }
-	}
 
     void GetInput()
     {
@@ -489,8 +492,8 @@ public class Main : MonoBehaviour
                 piece.MovePieceTo(destination);
             }
         }
-        tiles[(int)origin.x, (int)origin.y].occupied = false;
-        tiles[(int)destination.x, (int)destination.y].occupied = true;
+        //tiles[(int)origin.x, (int)origin.y].occupied = false;
+        //tiles[(int)destination.x, (int)destination.y].occupied = true; //This causes an error on capture.
     }
 
     void CaptureLocation(Vector2 location)
@@ -508,9 +511,22 @@ public class Main : MonoBehaviour
     {
         piece.gameObject.transform.position = new Vector3(0, -10, 0);
         piece.gameObject.SetActive(false);
-        tiles[(int)piece.MyCoordinates().x, (int)piece.MyCoordinates().y].occupied = false;
+        //tiles[(int)piece.MyCoordinates().x, (int)piece.MyCoordinates().y].occupied = false;
         Debug.Log("TODO log the capture");
 
+    }
+
+    void UpdateTileOccupation()
+    {
+        foreach (Tile tile in tiles)
+        {
+            tile.occupied = false;
+        }
+
+        foreach (Piece piece in pieces)
+        {
+            tiles[(int)piece.MyCoordinates().x, (int)piece.MyCoordinates().y].occupied = true;
+        }
     }
 
     void LeftClickLogic(RaycastHit hit)
