@@ -45,17 +45,15 @@ public class Piece
 
     //NOTE TO ME POSSIBLY ADD HIGHLIGHTING HERE TO MAKE IT MORE CLEAR WHAT PIECE WAS CLICKED?
 
-    //No capture logic has been implimented yet.
-
+    //TODO add EnPassant
     public List<Vector2> PawnMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     {
         List<Vector2> possibleMoves = new List<Vector2>();
 
-        //I guess it is possible that going from float to int can introduce an error here and it may be
-        //better to make the ints floats. However They should be real numbers and therfore a non issue in
-        //this case.
         int x = (int)position.x;
         int y = (int)position.y;
+        int xx = 0;
+        int yy = 0;
 
         if (player == 1)
         {
@@ -66,6 +64,32 @@ public class Piece
                 if (y == 1 && !tiles[x, y + 2].occupied)
                 {
                     possibleMoves.Add(new Vector2(x, y + 2));
+                }
+            }
+
+            xx = x + 1;
+            yy = y + 1;
+            if (xx > -1 && xx < 8 && yy > -1 && yy < 8 && tiles[xx, yy].occupied)
+            {
+                foreach (Piece piece in pieces)
+                {
+                    if (piece.MyCoordinates().x == xx && piece.MyCoordinates().y == yy && piece.player != player)
+                    {
+                        possibleMoves.Add(new Vector2(xx, yy));
+                    }
+                }
+            }
+
+            xx = x - 1;
+            yy = y + 1;
+            if (xx > -1 && xx < 8 && yy > -1 && yy < 8 && tiles[xx, yy].occupied)
+            {
+                foreach (Piece piece in pieces)
+                {
+                    if (piece.MyCoordinates().x == xx && piece.MyCoordinates().y == yy && piece.player != player)
+                    {
+                        possibleMoves.Add(new Vector2(xx, yy));
+                    }
                 }
             }
 
@@ -82,6 +106,33 @@ public class Piece
                     possibleMoves.Add(new Vector2(x, y - 2));
                 }
             }
+
+            xx = x + 1;
+            yy = y - 1;
+            if (xx > -1 && xx < 8 && yy > -1 && yy < 8 && tiles[xx, yy].occupied)
+            {
+                foreach (Piece piece in pieces)
+                {
+                    if (piece.MyCoordinates().x == xx && piece.MyCoordinates().y == yy && piece.player != player)
+                    {
+                        possibleMoves.Add(new Vector2(xx, yy));
+                    }
+                }
+            }
+
+            xx = x - 1;
+            yy = y - 1;
+            if (xx > -1 && xx < 8 && yy > -1 && yy < 8 && tiles[xx, yy].occupied)
+            {
+                foreach (Piece piece in pieces)
+                {
+                    if (piece.MyCoordinates().x == xx && piece.MyCoordinates().y == yy && piece.player != player)
+                    {
+                        possibleMoves.Add(new Vector2(xx, yy));
+                    }
+                }
+            }
+
 
         }
 

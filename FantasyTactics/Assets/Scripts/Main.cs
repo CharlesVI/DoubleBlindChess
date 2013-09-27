@@ -356,6 +356,7 @@ public class Main : MonoBehaviour
 
                 if (p1Type != Piece.Type.KNIGHT && p2Type != Piece.Type.KNIGHT)
                 {
+                    Debug.Log("Non Knight collision");
                     CaptureLocation(p1Location);
                     CaptureLocation(p2Location);
                 }
@@ -375,9 +376,16 @@ public class Main : MonoBehaviour
         CaptureCheck(p1Destination);
         CaptureCheck(p2Destination);
 
-        MovePieces(p1Origin, p1Destination);
-        MovePieces(p2Orgin, p2Destination);
-
+        if (p1Destination == p2Orgin)
+        {
+            MovePieces(p2Orgin, p2Destination);
+            MovePieces(p1Origin, p1Destination);
+        }
+        else
+        {
+            MovePieces(p1Origin, p1Destination);
+            MovePieces(p2Orgin, p2Destination);
+        }
         //TODO LOG MOVES
 
     }//Move Pieces
@@ -732,13 +740,13 @@ public class Main : MonoBehaviour
     {
         
 
-        if (GUI.Button(new Rect(Screen.width - 130, 10, 120, 40), "Player 1"))
+        if (GUI.Button(new Rect(Screen.width - 130, 10, 120, 40), "BLUE Player"))
         {
             whatPlayerAmI = 1;
             Clear();
         }
 
-        if (GUI.Button(new Rect(Screen.width - 130, 50, 120, 40), "Player 2"))
+        if (GUI.Button(new Rect(Screen.width - 130, 50, 120, 40), "RED Player"))
         {
             whatPlayerAmI = 2;
             Clear();
