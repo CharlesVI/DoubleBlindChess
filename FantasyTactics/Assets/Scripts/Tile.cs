@@ -10,6 +10,8 @@ public class Tile
     public bool occupied;
     public bool moveable;
     public bool destination;
+    public bool p1Threat;
+    public bool p2Threat;
 
     Color startColor;
     Color moveableColor = Color.blue;
@@ -43,6 +45,10 @@ public class Tile
         gameObject.transform.renderer.material.color = destinationColor;
     }
 
+
+    // Add theat method here. ALSO in unhighlight check if threatened before going to start color.
+    //Threat method will just be for the setting of threatened status and the coloring of it.... since clear calls unhighlight 
+    //FIRST TRY HAVING UNHIGHLIGHT BE THE ONLY SOURCE OF THREAT COLOR.
     public void UnHighlight()
     {
         gameObject.transform.renderer.material.color = startColor;

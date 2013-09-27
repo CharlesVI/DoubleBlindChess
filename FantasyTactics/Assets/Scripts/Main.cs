@@ -55,6 +55,8 @@ public class Main : MonoBehaviour
             UnMovePieces();
             CaptureAndMove();
             UpdateTileOccupation();
+            ClearThreats();
+            ThreatCheck();
 
             playerOneReady = false;
             playerTwoReady = false;
@@ -209,8 +211,6 @@ public class Main : MonoBehaviour
 
         return piece;
     }
-
-
 
     void GetInput()
     {
@@ -396,6 +396,48 @@ public class Main : MonoBehaviour
         {
             piece.moved = false;
         }
+    }
+
+    void ThreatCheck()
+    {
+        foreach (Piece piece in pieces)
+        {
+            switch (piece.type)
+            {
+                case Piece.Type.PAWN:
+                     
+
+                    break;
+
+                case Piece.Type.BISHOP:
+
+                    break;
+
+                case Piece.Type.KNIGHT:
+
+                    RegisterThreat(piece.player, piece.KnightMoves(piece.MyCoordinates(),piece.player, tiles, pieces));
+
+                    break;
+
+                case Piece.Type.ROOK:
+
+                    break;
+
+                case Piece.Type.QUEEN:
+
+                    break;
+
+                case Piece.Type.KING:
+
+                    break;
+
+                default:
+                    Debug.Log("Something wrong in piece type");
+                    break;
+            }
+        
+        }
+    
     }
 
     Piece.Type PieceType(int x, int y)
@@ -669,6 +711,31 @@ public class Main : MonoBehaviour
         }
 
 
+    }
+
+    void ClearThreats()
+    {
+        foreach (Tile tile in tiles)
+        {
+            tile.p1Threat = false;
+            tile.p2Threat = false;
+        }
+    }
+
+    public void RegisterThreat(int player, List<Vector2> threatList)
+    {
+        foreach (Vector2 threat in threatList)
+        { 
+            if(player == 1)
+            {
+                tiles[(int)threat.x, (int)threat.y].p1Threat = true;
+            }
+
+            if (player == 2)
+            {    
+                tiles[(int)threat.x, (int)threat.y].p2Threat = true;   
+            }
+        }
     }
 
     public void HighlightMoves(List<Vector2> moveList)
