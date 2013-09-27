@@ -10,7 +10,7 @@ public class Piece
     public Type type;
     public int player;
     public Color color;
-    public bool canMove;
+    public bool moved;
     public bool active; //I think this is un Needed.
 
     public Material pawn;
@@ -29,7 +29,7 @@ public class Piece
     public void MovePieceTo(Vector2 destination)
     {
         gameObject.transform.position = new Vector3(destination.x * 3, 1, destination.y * 3);
-        canMove = false;
+        moved = false;
     }
 
     public Vector2 MyCoordinates()

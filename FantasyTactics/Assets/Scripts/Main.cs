@@ -52,7 +52,8 @@ public class Main : MonoBehaviour
 
         if (playerOneReady && playerTwoReady)
         {
-            ResolveTurn();
+            UnMovePieces();
+            CaptureAndMove();
             UpdateTileOccupation();
 
             playerOneReady = false;
@@ -224,7 +225,7 @@ public class Main : MonoBehaviour
         }
     }//GetInput
 
-    void ResolveTurn()
+    void CaptureAndMove()
     { 
         //Note on collisions: Peice A moves into where peice B is leaving is a collision iff
         //Piece B moving into the square Piece a is leaving as well (or has become stationary)?. 
@@ -264,6 +265,9 @@ public class Main : MonoBehaviour
             }
             
         }
+
+        p1Piece.moved = true;
+        p2Piece.moved = true;
 
         if (p1Type != Piece.Type.KNIGHT)
         {
@@ -374,8 +378,17 @@ public class Main : MonoBehaviour
         MovePieces(p1Origin, p1Destination);
         MovePieces(p2Orgin, p2Destination);
 
-        Debug.Log("Log Moves Here");
+        //TODO LOG MOVES
+
     }//Move Pieces
+
+    void UnMovePieces()
+    {
+        foreach (Piece piece in pieces)
+        {
+            piece.moved = false;
+        }
+    }
 
     Piece.Type PieceType(int x, int y)
     {
@@ -474,9 +487,9 @@ public class Main : MonoBehaviour
 
         foreach (Piece piece in pieces)
         {
-            if (piece.MyCoordinates() == destination)
+            if (piece.MyCoordinates() == destination && !piece.moved)
             {
-                Debug.Log("Piece captured at " + destination);
+                Debug.Log("capture check calls for a capture");
                 CaptureLocation(destination);
             }
         }
@@ -512,6 +525,7 @@ public class Main : MonoBehaviour
         piece.gameObject.transform.position = new Vector3(0, -10, 0);
         piece.gameObject.SetActive(false);
         //tiles[(int)piece.MyCoordinates().x, (int)piece.MyCoordinates().y].occupied = false;
+        Debug.Log("A " + piece.type + "for Player " + piece.player + " Has been captured");
         Debug.Log("TODO log the capture");
 
     }
