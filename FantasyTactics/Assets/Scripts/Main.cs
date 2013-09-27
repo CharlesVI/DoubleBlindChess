@@ -234,6 +234,8 @@ public class Main : MonoBehaviour
         int p1y2 = (int)p1Destination.y;
         Vector2 p1Direction;
         Piece.Type p1Type;
+        Piece p1Piece = new Piece();
+
 
         int p2x1 = (int)p2Orgin.x;
         int p2x2 = (int)p2Destination.x;
@@ -241,9 +243,24 @@ public class Main : MonoBehaviour
         int p2y2 = (int)p2Destination.y;
         Vector2 p2Direction;
         Piece.Type p2Type;
+        Piece p2Piece = new Piece();
 
         p1Type = PieceType(p1x1, p1y1);
         p2Type = PieceType(p2x1, p2y1);
+
+        foreach (Piece piece in pieces)
+        {
+            if (p2Orgin == piece.MyCoordinates())
+            {
+                p2Piece = piece;
+            }
+
+            if (p1Origin == piece.MyCoordinates())
+            {
+                p1Piece = piece;
+            }
+            
+        }
 
         if (p1Type != Piece.Type.KNIGHT)
         {
@@ -324,14 +341,24 @@ public class Main : MonoBehaviour
                 //Mid Movement collision
                 Debug.Log("Mid Movement collision detected");
                 Debug.Log("Player 1 Location " + p1Location + " Player 2 location " + p2Location);
-                CapturePiece(p1Location);
-                CapturePiece(p2Location);
+                if (p1Type == Piece.Type.KNIGHT && p2Type == Piece.Type.KNIGHT)
+                {
+                    CaptureLocation(p1Location);
+                    CaptureLocation(p2Location);
+                }
+
+                if (p1Type != Piece.Type.KNIGHT && p2Type != Piece.Type.KNIGHT)
+                {
+                    CaptureLocation(p1Location);
+                    CaptureLocation(p2Location);
+                }
             }
 
             if (p1Location == p2Location)
             {
                 Debug.Log("collision detected");
-                //Is the mid movement method needed?
+                CapturePiece(p1Piece);
+                CapturePiece(p2Piece);
             }
 
         }
@@ -447,7 +474,7 @@ public class Main : MonoBehaviour
             if (piece.MyCoordinates() == destination)
             {
                 Debug.Log("Piece captured at " + destination);
-                CapturePiece(destination);
+                CaptureLocation(destination);
             }
         }
     }
@@ -466,18 +493,24 @@ public class Main : MonoBehaviour
         tiles[(int)destination.x, (int)destination.y].occupied = true;
     }
 
-    void CapturePiece(Vector2 location)
+    void CaptureLocation(Vector2 location)
     {
         foreach (Piece piece in pieces)
         {
             if (piece.MyCoordinates() == location)
             {
-                //I dont think I need to move it technically but you never know.
-                piece.gameObject.transform.position = new Vector3(0, -10, 0);
-                piece.gameObject.SetActive(false);
-                Debug.Log("TODO log the capture");
+                CapturePiece(piece);
             }
         }
+    }
+
+    void CapturePiece(Piece piece)
+    {
+        piece.gameObject.transform.position = new Vector3(0, -10, 0);
+        piece.gameObject.SetActive(false);
+        tiles[(int)piece.MyCoordinates().x, (int)piece.MyCoordinates().y].occupied = false;
+        Debug.Log("TODO log the capture");
+
     }
 
     void LeftClickLogic(RaycastHit hit)
@@ -611,6 +644,7 @@ public class Main : MonoBehaviour
     //I could probally save the list and only undo the tiles that are actually highlighted
     //However I dont think it will make a performance diffrence and it might even be an
     //advantage not having to go through multipul things and refrence stuff.
+
     public void Clear()
     {
         foreach (Tile tile in tiles)

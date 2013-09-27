@@ -46,6 +46,7 @@ public class Piece
     //NOTE TO ME POSSIBLY ADD HIGHLIGHTING HERE TO MAKE IT MORE CLEAR WHAT PIECE WAS CLICKED?
 
     //No capture logic has been implimented yet.
+
     public List<Vector2> PawnMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     {
         List<Vector2> possibleMoves = new List<Vector2>();
