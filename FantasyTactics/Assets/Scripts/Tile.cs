@@ -7,6 +7,7 @@ public class Tile
 {
     public GameObject gameObject { get; set; }
     public Vector2 id {get; set;}
+
     public bool occupied;
     public bool moveable;
     public bool destination;
@@ -16,26 +17,41 @@ public class Tile
     public bool showThreats;
 
     Color startColor;
-    Color moveableColor = Color.blue;
-    Color attackColor = Color.red; //These need to turn into shades of the startColor
-    Color destinationColor = Color.green; // same here.
-    Color p1ThreatColor = Color.cyan;
+    Color moveableColor;
+    Color attackColor; //These need to turn into shades of the startColor
+    Color destinationColor; // same here.
+    Color p1ThreatColor;
     Color p2ThreatColor;
     Color contestedColor;
 
     //Not sure if this is a really good idea or not but I think it is.
     //Going to use this to sorta define all the other colors as shades of the
     //Start color
-    public void StartColor(Color color)
+    public void StartColor(Color color, bool darkTile)
     {
         startColor = color;
-        
+
+        if (darkTile)
+        {
+            moveableColor = new Color(10, 50, 90);
+            attackColor = new Color(100, 0, 0);
+            destinationColor = new Color(0, 100, 0);
+            p1ThreatColor = new Color(0, 0, 50);
+            p2ThreatColor = new Color(100, 50, 0);
+            contestedColor = new Color(100, 50, 100);
+        }
+
+        if (!darkTile)
+        {
+            moveableColor = new Color(60, 0, 0);
+            attackColor = new Color(100, 0, 0);
+            destinationColor = new Color(0, 100, 0);
+            p1ThreatColor = new Color(0, 0, 50);
+            p2ThreatColor = new Color(100, 50, 0);
+            contestedColor = new Color(100, 50, 100);
+        }
         //This is to apply a tint to the color instead of a set color, to preserve the light dark thing.
         //This is not working, TODO
-        p1ThreatColor = Color.cyan;
-        p2ThreatColor = Color.cyan;
-        contestedColor = color + new Color(100, 0, 100);
-
 
         SetMyColor(color);
     }

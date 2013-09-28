@@ -83,13 +83,13 @@ public class Main : MonoBehaviour
             int counter = xx + yy;
             if(counter % 2 == 0)
             {
-                tiles[xx, yy].StartColor(Color.black);
+                tiles[xx, yy].StartColor(Color.black, true);
                 //tiles[xx, yy].gameObject.transform.renderer.material.color = Color.black;
             }
 
             if (counter % 2 != 0)
             { 
-                tiles[xx, yy].StartColor(Color.white);
+                tiles[xx, yy].StartColor(Color.white, false);
             }
         }
             
@@ -838,13 +838,13 @@ public class Main : MonoBehaviour
     {
         
 
-        if (GUI.Button(new Rect(Screen.width - 130, 10, 120, 40), "BLUE Player"))
+        if (GUI.Button(new Rect(Screen.width - 130, 50, 120, 40), "BLUE Player"))
         {
             whatPlayerAmI = 1;
             Clear();
         }
 
-        if (GUI.Button(new Rect(Screen.width - 130, 50, 120, 40), "RED Player"))
+        if (GUI.Button(new Rect(Screen.width - 130, 10, 120, 40), "RED Player"))
         {
             whatPlayerAmI = 2;
             Clear();
