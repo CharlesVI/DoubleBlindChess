@@ -43,6 +43,7 @@ public class Main : MonoBehaviour
     {   
         SetupBoard();
         SetupPieces();
+        ThreatCheck();
 	}
 
     // Update is called once per frame
@@ -57,12 +58,14 @@ public class Main : MonoBehaviour
             UpdateTileOccupation();
             ClearThreats();
             ThreatCheck();
+            Clear();
 
             playerOneReady = false;
             playerTwoReady = false;
         }
 
 	}
+
 	void SetupBoard()
     {
         for (int xx = 0; xx < maxX; xx++) for (int yy = 0; yy < maxY; yy++)
@@ -398,48 +401,6 @@ public class Main : MonoBehaviour
         }
     }
 
-    void ThreatCheck()
-    {
-        foreach (Piece piece in pieces)
-        {
-            switch (piece.type)
-            {
-                case Piece.Type.PAWN:
-                     
-
-                    break;
-
-                case Piece.Type.BISHOP:
-
-                    break;
-
-                case Piece.Type.KNIGHT:
-
-                    RegisterThreat(piece.player, piece.KnightMoves(piece.MyCoordinates(),piece.player, tiles, pieces));
-
-                    break;
-
-                case Piece.Type.ROOK:
-
-                    break;
-
-                case Piece.Type.QUEEN:
-
-                    break;
-
-                case Piece.Type.KING:
-
-                    break;
-
-                default:
-                    Debug.Log("Something wrong in piece type");
-                    break;
-            }
-        
-        }
-    
-    }
-
     Piece.Type PieceType(int x, int y)
     {
         foreach (Piece piece in pieces)
@@ -713,6 +674,62 @@ public class Main : MonoBehaviour
 
     }
 
+    void ThreatCheck()
+    {
+        foreach (Piece piece in pieces)
+        {
+            switch (piece.type)
+            {
+                case Piece.Type.PAWN:
+                     
+                    //A special case the forward moves does not count.
+
+                    break;
+
+                case Piece.Type.BISHOP:
+
+                    RegisterThreat(piece.player, piece.BishopMoves(piece.MyCoordinates(), piece.player,
+                        tiles, pieces));
+
+                    break;
+
+                case Piece.Type.KNIGHT:
+
+                    RegisterThreat(piece.player, piece.KnightMoves(piece.MyCoordinates(),piece.player,
+                        tiles, pieces));
+
+                    break;
+
+                case Piece.Type.ROOK:
+
+                    RegisterThreat(piece.player, piece.RookMoves(piece.MyCoordinates(), piece.player,
+                        tiles, pieces));
+
+                    break;
+
+                case Piece.Type.QUEEN:
+
+                    RegisterThreat(piece.player, piece.QueenMoves(piece.MyCoordinates(), piece.player,
+                        tiles, pieces));
+
+                    break;
+
+                case Piece.Type.KING:
+
+                    RegisterThreat(piece.player, piece.KingMoves(piece.MyCoordinates(), piece.player,
+                        tiles, pieces));
+
+                    break;
+
+                default:
+                    Debug.Log("Something wrong in piece type");
+                    break;
+            }
+        
+        }
+    
+    }
+
     void ClearThreats()
     {
         foreach (Tile tile in tiles)
@@ -725,16 +742,20 @@ public class Main : MonoBehaviour
     public void RegisterThreat(int player, List<Vector2> threatList)
     {
         foreach (Vector2 threat in threatList)
-        { 
+        {
+            //Debug.Log(threatList.Count);
+            Tile tile = tiles[(int)threat.x, (int)threat.y];
             if(player == 1)
             {
-                tiles[(int)threat.x, (int)threat.y].p1Threat = true;
+                tile.p1Threat = true;
             }
 
             if (player == 2)
             {    
-                tiles[(int)threat.x, (int)threat.y].p2Threat = true;   
+                tile.p2Threat = true;   
             }
+            tile.Threatened();
+            
         }
     }
 
@@ -778,6 +799,16 @@ public class Main : MonoBehaviour
             }          
         }
         PlayerSelector();
+
+        //Later put in a config Menu
+        if (GUI.Button(new Rect(10, Screen.height - 50, btnWidth, btnHeight), "Threat On/Off"))
+        {
+            foreach (Tile tile in tiles)
+            {
+                tile.showThreats = !tile.showThreats;
+                Clear();
+            }
+        }
     }//OnGUI
 
     public void ConfirmMove()

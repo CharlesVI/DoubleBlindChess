@@ -13,10 +13,15 @@ public class Tile
     public bool p1Threat;
     public bool p2Threat;
 
+    public bool showThreats;
+
     Color startColor;
     Color moveableColor = Color.blue;
     Color attackColor = Color.red; //These need to turn into shades of the startColor
     Color destinationColor = Color.green; // same here.
+    Color p1ThreatColor = Color.cyan;
+    Color p2ThreatColor;
+    Color contestedColor;
 
     //Not sure if this is a really good idea or not but I think it is.
     //Going to use this to sorta define all the other colors as shades of the
@@ -24,8 +29,15 @@ public class Tile
     public void StartColor(Color color)
     {
         startColor = color;
-        //moveableColor = new Color(startColor.r, startColor.g, 255, 255);
-        gameObject.transform.renderer.material.color = color;
+        
+        //This is to apply a tint to the color instead of a set color, to preserve the light dark thing.
+        //This is not working, TODO
+        p1ThreatColor = Color.cyan;
+        p2ThreatColor = Color.cyan;
+        contestedColor = color + new Color(100, 0, 100);
+
+
+        SetMyColor(color);
     }
 
     public void Moveable()
@@ -42,7 +54,31 @@ public class Tile
     public void Destination()
     {
         destination = true;
-        gameObject.transform.renderer.material.color = destinationColor;
+        SetMyColor(destinationColor);
+    }
+
+    public void Threatened()
+    {
+        if (showThreats)
+        {
+            if (p1Threat)
+            {
+                SetMyColor(p1ThreatColor);
+            }
+            if (p2Threat)
+            {
+                SetMyColor(p2ThreatColor);
+            }
+            if (p1Threat && p2Threat)
+            {
+                SetMyColor(contestedColor);
+            }
+        }
+    }
+
+    void SetMyColor(Color color)
+    {
+        gameObject.transform.renderer.material.color = color;
     }
 
 
@@ -52,6 +88,8 @@ public class Tile
     public void UnHighlight()
     {
         gameObject.transform.renderer.material.color = startColor;
+        Threatened(); // keep threat highlight through Clear call.
+
         moveable = false;
         destination = false;
     }
