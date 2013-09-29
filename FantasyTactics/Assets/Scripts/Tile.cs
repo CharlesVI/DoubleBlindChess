@@ -33,22 +33,22 @@ public class Tile
 
         if (darkTile)
         {
-            moveableColor = new Color(10, 50, 90);
-            attackColor = new Color(100, 0, 0);
-            destinationColor = new Color(0, 100, 0);
-            p1ThreatColor = new Color(0, 0, 50);
-            p2ThreatColor = new Color(100, 50, 0);
-            contestedColor = new Color(100, 50, 100);
+            moveableColor = new Color32(255, 255, 50, 255);
+            attackColor = new Color32(255, 150, 50, 255);
+            destinationColor = new Color32(70, 255, 50, 255);
+            p1ThreatColor = new Color32(25, 40, 130, 255);
+            p2ThreatColor = new Color32(130,25,25,255);
+            contestedColor = new Color32(90,25,130,255);
         }
 
         if (!darkTile)
         {
-            moveableColor = new Color(60, 0, 0);
-            attackColor = new Color(100, 0, 0);
-            destinationColor = new Color(0, 100, 0);
-            p1ThreatColor = new Color(0, 0, 50);
-            p2ThreatColor = new Color(100, 50, 0);
-            contestedColor = new Color(100, 50, 100);
+            moveableColor = new Color32(255,255,50,255);
+            attackColor = new Color32(255,150,50,255);
+            destinationColor = new Color32(70,255,50,255);
+            p1ThreatColor = new Color32(50,145,255,255);
+            p2ThreatColor = new Color32(255,50,100,255);
+            contestedColor = new Color32(200,50,255,255);
         }
         //This is to apply a tint to the color instead of a set color, to preserve the light dark thing.
         //This is not working, TODO

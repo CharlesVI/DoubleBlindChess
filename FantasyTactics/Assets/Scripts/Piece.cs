@@ -132,11 +132,59 @@ public class Piece
                     }
                 }
             }
-
-
         }
 
         return possibleMoves;
+    }
+
+    public List<Vector2> PawnThreats(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> threats = new List<Vector2>();
+
+        int x = (int)position.x;
+        int y = (int)position.y;
+
+        if (player == 1)
+        {
+            {
+                int xx = x + 1;
+                int yy = y + 1;
+
+                if (xx > -1 && xx < 8 && yy > -1 && yy < 8)
+                {
+                    threats.Add(new Vector2(xx, yy));
+                }
+
+                xx = x - 1;
+                yy = y + 1;
+
+                if (xx > -1 && xx < 8 && yy > -1 && yy < 8)
+                {
+                    threats.Add(new Vector2(xx, yy));
+                }
+            }
+        }
+
+        if (player == 2)
+        {
+            int xx = x + 1;
+            int yy = y - 1;
+
+            if (xx > -1 && xx < 8 && yy > -1 && yy < 8)
+            {
+                threats.Add(new Vector2(xx, yy));
+            }
+
+            xx = x - 1;
+            yy = y - 1;
+
+            if (xx > -1 && xx < 8 && yy > -1 && yy < 8)
+            {
+                threats.Add(new Vector2(xx, yy));
+            }
+        }
+
+        return threats;
     }
 
     //Recetnly added Pieces to the list of passed things. Makes me think tiles is not needed.

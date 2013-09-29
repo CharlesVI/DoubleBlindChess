@@ -681,9 +681,10 @@ public class Main : MonoBehaviour
             switch (piece.type)
             {
                 case Piece.Type.PAWN:
-                     
-                    //A special case the forward moves does not count.
 
+                    RegisterThreat(piece.player, piece.PawnThreats(piece.MyCoordinates(), piece.player,
+                        tiles, pieces));
+ 
                     break;
 
                 case Piece.Type.BISHOP:
