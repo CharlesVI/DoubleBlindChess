@@ -689,35 +689,35 @@ public class Main : MonoBehaviour
 
                 case Piece.Type.BISHOP:
 
-                    RegisterThreat(piece.player, piece.BishopMoves(piece.MyCoordinates(), piece.player,
+                    RegisterThreat(piece.player, piece.BishopThreats(piece.MyCoordinates(), piece.player,
                         tiles, pieces));
 
                     break;
 
                 case Piece.Type.KNIGHT:
 
-                    RegisterThreat(piece.player, piece.KnightMoves(piece.MyCoordinates(),piece.player,
+                    RegisterThreat(piece.player, piece.KnightThreats(piece.MyCoordinates(), piece.player,
                         tiles, pieces));
 
                     break;
 
                 case Piece.Type.ROOK:
 
-                    RegisterThreat(piece.player, piece.RookMoves(piece.MyCoordinates(), piece.player,
+                    RegisterThreat(piece.player, piece.RookThreats(piece.MyCoordinates(), piece.player,
                         tiles, pieces));
 
                     break;
 
                 case Piece.Type.QUEEN:
 
-                    RegisterThreat(piece.player, piece.QueenMoves(piece.MyCoordinates(), piece.player,
+                    RegisterThreat(piece.player, piece.QueenThreats(piece.MyCoordinates(), piece.player,
                         tiles, pieces));
 
                     break;
 
                 case Piece.Type.KING:
 
-                    RegisterThreat(piece.player, piece.KingMoves(piece.MyCoordinates(), piece.player,
+                    RegisterThreat(piece.player, piece.KingThreats(piece.MyCoordinates(), piece.player,
                         tiles, pieces));
 
                     break;

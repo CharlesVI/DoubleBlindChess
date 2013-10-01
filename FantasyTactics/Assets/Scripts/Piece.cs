@@ -187,7 +187,6 @@ public class Piece
         return threats;
     }
 
-    //Recetnly added Pieces to the list of passed things. Makes me think tiles is not needed.
     public List<Vector2> RookMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     {
         List<Vector2> possibleMoves = new List<Vector2>();
@@ -198,6 +197,18 @@ public class Piece
         possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 0, -1));
 
         return possibleMoves;
+    }
+
+    public List<Vector2> RookThreats(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> possibleThreats = new List<Vector2>();
+
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 8, 1, 0));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 8, -1, 0));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 8, 0, 1));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 8, 0, -1));
+
+        return possibleThreats;
     }
 
     public List<Vector2> KnightMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
@@ -217,6 +228,23 @@ public class Piece
         return possibleMoves;
     }
 
+    public List<Vector2> KnightThreats(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> possibleThreats = new List<Vector2>();
+
+        //I dont know if this is just how it has to be or I'm not smart enough but...
+        possibleThreats.AddRange(KnightMove(position, player, tiles, pieces, 2, 1));
+        possibleThreats.AddRange(KnightMove(position, player, tiles, pieces, 2, -1));
+        possibleThreats.AddRange(KnightMove(position, player, tiles, pieces, -2, 1));
+        possibleThreats.AddRange(KnightMove(position, player, tiles, pieces, -2, -1));
+        possibleThreats.AddRange(KnightMove(position, player, tiles, pieces, 1, 2));
+        possibleThreats.AddRange(KnightMove(position, player, tiles, pieces, 1, -2));
+        possibleThreats.AddRange(KnightMove(position, player, tiles, pieces, -1, 2));
+        possibleThreats.AddRange(KnightMove(position, player, tiles, pieces, -1, -2));
+
+        return possibleThreats;
+    }
+
     public List<Vector2> BishopMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     {
         List<Vector2> possibleMoves = new List<Vector2>();
@@ -227,6 +255,18 @@ public class Piece
         possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, -1));
 
         return possibleMoves;
+    }
+
+    public List<Vector2> BishopThreats(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> possibleThreats = new List<Vector2>();
+
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 8, 1, 1));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 8, -1, 1));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 8, 1, -1));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 8, -1, -1));
+
+        return possibleThreats;
     }
 
     public List<Vector2> QueenMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
@@ -246,6 +286,23 @@ public class Piece
         return possibleMoves;
     }
 
+    public List<Vector2> QueenThreats(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> possibleMoves = new List<Vector2>();
+
+        possibleMoves.AddRange(LineThreats(position, player, tiles, pieces, 8, 1, 0));
+        possibleMoves.AddRange(LineThreats(position, player, tiles, pieces, 8, -1, 0));
+        possibleMoves.AddRange(LineThreats(position, player, tiles, pieces, 8, 0, 1));
+        possibleMoves.AddRange(LineThreats(position, player, tiles, pieces, 8, 0, -1));
+
+        possibleMoves.AddRange(LineThreats(position, player, tiles, pieces, 8, 1, 1));
+        possibleMoves.AddRange(LineThreats(position, player, tiles, pieces, 8, -1, 1));
+        possibleMoves.AddRange(LineThreats(position, player, tiles, pieces, 8, 1, -1));
+        possibleMoves.AddRange(LineThreats(position, player, tiles, pieces, 8, -1, -1));
+
+        return possibleMoves;
+    }
+
     //TODO add check check and castle.
     public List<Vector2> KingMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     {
@@ -261,7 +318,54 @@ public class Piece
         possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 1, -1));
         possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, -1, -1));
 
-        return possibleMoves;
+        List<Vector2> allowedMoves = new List<Vector2>();
+
+        allowedMoves = CheckCheck(possibleMoves, player, tiles);
+
+        return allowedMoves;
+    }
+
+    List<Vector2> CheckCheck(List<Vector2> possibleMoves, int player, Tile[,] tiles)
+    {
+        //Okay first issue is the king is not "transparent" so you can move into check by say
+        //Moving up a tile when a rook is in your column
+
+        List<Vector2> allowedMoves = new List<Vector2>();
+
+        foreach (Vector2 move in possibleMoves)
+        {
+            int x = (int)move.x;
+            int y = (int)move.y;
+
+            if (!tiles[x, y].p1Threat && player == 2)
+            {
+                allowedMoves.Add(move);
+            }
+
+            if (!tiles[x, y].p2Threat && player == 1)
+            {
+                allowedMoves.Add(move);
+            }
+        }
+
+        return allowedMoves;
+    }
+
+    public List<Vector2> KingThreats(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> possibleThreats = new List<Vector2>();
+
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 1, 0));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, -1, 0));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 0, 1));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 0, -1));
+
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 1, 1));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, -1, 1));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 1, -1));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, -1, -1));
+
+        return possibleThreats;
     }
 
     List<Vector2> LineMoves(Vector2 origin, int player, Tile[,] tiles,
@@ -330,5 +434,52 @@ public class Piece
             }
         }
         return knightMove;
+    }
+
+    List<Vector2> LineThreats(Vector2 origin, int player, Tile[,] tiles,
+        Piece[] pieces, int maxDistance, int xDirection, int yDirection)
+    {
+        List<Vector2> lineThreats = new List<Vector2>();
+
+        int x = (int)origin.x;
+        int y = (int)origin.y;
+
+        //can i use x direction to determin < 8 or > 0?
+        for (int ii = 0; ii < maxDistance; ii++)
+        {
+
+            x += xDirection;
+            y += yDirection;
+
+            if (x < 8 && x > -1 && y < 8 && y > -1)
+            {
+                if (!tiles[x, y].occupied)
+                {
+                    lineThreats.Add(new Vector2(x, y));
+                }
+
+                if (tiles[x, y].occupied)
+                {
+                    lineThreats.Add(new Vector2(x, y));
+                    return lineThreats;    
+                }
+                
+             }
+        }
+        return lineThreats;
+    }
+
+    List<Vector2> KnightThreats(Vector2 origin, int player, Tile[,] tiles, Piece[] pieces, int xDirection, int yDirection)
+    {
+        int x = (int)origin.x + xDirection;
+        int y = (int)origin.y + yDirection;
+        Vector2 move = new Vector2(x, y);
+        List<Vector2> knightThreat = new List<Vector2>();
+
+        if (x > -1 && x < 8 && y > -1 && y < 8)
+        {
+            knightThreat.Add(move);
+        }
+        return knightThreat;
     }
 }
