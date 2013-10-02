@@ -41,6 +41,9 @@ public class Main : MonoBehaviour
     Vector2 p2Orgin;
     Vector2 p2Destination;
 
+    bool p1Check;
+    bool p2Check;
+
 	// Use this for initialization
 	void Start () 
     {   
@@ -61,6 +64,7 @@ public class Main : MonoBehaviour
             UpdateTileOccupation();
             ClearThreats();
             ThreatCheck(tiles);
+            CheckCheck();
             Clear();
 
             playerOneReady = false;
@@ -860,6 +864,8 @@ public class Main : MonoBehaviour
 
         GUI.Label(new Rect(Screen.width - 130, 130, 120, 40), "Player 2 ready: " + playerTwoReady);
         GUI.Label(new Rect(Screen.width - 130, 170, 120, 40), "Player 1 ready: " + playerOneReady);
+        GUI.Label(new Rect(Screen.width - 130, 210, 120, 40), "Player 1 check? " + p1Check);
+        GUI.Label(new Rect(Screen.width - 130, 250, 120, 40), "Player 2 check? " + p2Check);
     }
 
     public void KingStuff(Piece king)
@@ -882,9 +888,43 @@ public class Main : MonoBehaviour
         ThreatCheck(virtualTiles);
 
         //Not sure why I have to do this but it seems like 
-        //virtual Tiles is effecting normal tiles.
+        //virtual Tiles is effecting normal tiles. However it seems
+        //To be working so I'll move on with this fix.
         virtualTiles[x, y].occupied = true;
         
+    }
+
+    public void CheckCheck()
+    {
+        foreach (Piece piece in pieces)
+        {
+            if (piece.type == Piece.Type.KING)
+            {
+                int x = (int)piece.MyCoordinates().x;
+                int y = (int)piece.MyCoordinates().y;
+
+                Debug.Log(piece.MyCoordinates());
+                Debug.Log("Piece type + player " + tiles[x, y].p1Threat + " " + piece.player);
+
+                if (tiles[x, y].p1Threat && piece.player == 2)
+                {
+                    p2Check = true;
+                }
+                else if (!tiles[x,y].p1Threat && piece.player == 2)
+                {
+                    p2Check = false;
+                }
+
+                if (tiles[x, y].p2Threat && piece.player == 1)
+                {
+                    p1Check = true;
+                }
+                else if (!tiles[x, y].p2Threat && piece.player == 1)
+                {
+                    p1Check = false;
+                }
+            }
+        }
     }
 }//Class     
 
