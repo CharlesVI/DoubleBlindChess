@@ -9,9 +9,10 @@ public class Piece
     public enum Type { PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING };
     public Type type;
     public int player;
-    public Color color;
+    public Color playerColor;
+    public Color movedColor;
     public bool moved;
-    public bool active; //I think this is un Needed.
+    //public bool active; //I think this is un Needed.
 
     public Material pawn;
     public Material rook;
@@ -29,7 +30,20 @@ public class Piece
     public void MovePieceTo(Vector2 destination)
     {
         gameObject.transform.position = new Vector3(destination.x * 3, 1, destination.y * 3);
+        moved = true;
+        SetMyColor(movedColor);
+    }
+
+    public void UnMovePiece()
+    {
         moved = false;
+        SetMyColor(playerColor);
+
+    }
+
+    void SetMyColor(Color color)
+    {
+        gameObject.transform.renderer.material.color = color;
     }
 
     public Vector2 MyCoordinates()
@@ -40,6 +54,7 @@ public class Piece
         return location;
     }
 
+    #region moves
     //Second Note: Starting to think that I could just passes peice type and lowered redundancy
     //A lot here. Not sure if it would be that much better though.
 
@@ -137,6 +152,88 @@ public class Piece
         return possibleMoves;
     }
 
+    public List<Vector2> RookMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> possibleMoves = new List<Vector2>();
+
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, 0));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, 0));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 0, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 0, -1));
+
+        return possibleMoves;
+    }
+
+    public List<Vector2> KnightMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> possibleMoves = new List<Vector2>();
+
+        //I dont know if this is just how it has to be or I'm not smart enough but...
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, 2, 1));
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, 2, -1));
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, -2, 1));
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, -2, -1));
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, 1, 2));
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, 1, -2));
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, -1, 2));
+        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces,-1, -2));
+
+        return possibleMoves;
+    }
+
+    public List<Vector2> BishopMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> possibleMoves = new List<Vector2>();
+
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, -1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, -1));
+
+        return possibleMoves;
+    }
+
+    public List<Vector2> QueenMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> possibleMoves = new List<Vector2>();
+
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, 0));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, 0));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 0, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 0, -1));
+
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, -1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, -1));
+
+        return possibleMoves;
+    }
+
+    //TODO add check check and castle.
+    public List<Vector2> KingMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> possibleMoves = new List<Vector2>();
+
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 1, 0));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, -1, 0));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 0, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 0, -1));
+
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 1, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, -1, 1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 1, -1));
+        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, -1, -1));
+
+        List<Vector2> allowedMoves = new List<Vector2>();
+
+        allowedMoves = CheckCheck(possibleMoves, player, tiles);
+
+        return allowedMoves;
+    }
+#endregion
+
+    #region threats
     public List<Vector2> PawnThreats(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     {
         List<Vector2> threats = new List<Vector2>();
@@ -185,19 +282,7 @@ public class Piece
         }
 
         return threats;
-    }
-
-    public List<Vector2> RookMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
-    {
-        List<Vector2> possibleMoves = new List<Vector2>();
-
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, 0));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, 0));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 0, 1));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 0, -1));
-
-        return possibleMoves;
-    }
+    } 
 
     public List<Vector2> RookThreats(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     {
@@ -209,23 +294,6 @@ public class Piece
         possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 8, 0, -1));
 
         return possibleThreats;
-    }
-
-    public List<Vector2> KnightMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
-    {
-        List<Vector2> possibleMoves = new List<Vector2>();
-
-        //I dont know if this is just how it has to be or I'm not smart enough but...
-        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, 2, 1));
-        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, 2, -1));
-        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, -2, 1));
-        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, -2, -1));
-        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, 1, 2));
-        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, 1, -2));
-        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces, -1, 2));
-        possibleMoves.AddRange(KnightMove(position, player, tiles, pieces,-1, -2));
-
-        return possibleMoves;
     }
 
     public List<Vector2> KnightThreats(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
@@ -245,18 +313,6 @@ public class Piece
         return possibleThreats;
     }
 
-    public List<Vector2> BishopMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
-    {
-        List<Vector2> possibleMoves = new List<Vector2>();
-
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, 1));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, 1));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, -1));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, -1));
-
-        return possibleMoves;
-    }
-
     public List<Vector2> BishopThreats(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     {
         List<Vector2> possibleThreats = new List<Vector2>();
@@ -267,23 +323,6 @@ public class Piece
         possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 8, -1, -1));
 
         return possibleThreats;
-    }
-
-    public List<Vector2> QueenMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
-    {
-        List<Vector2> possibleMoves = new List<Vector2>();
-
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, 0));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, 0));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 0, 1));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 0, -1));
-
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, 1));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, 1));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, 1, -1));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 8, -1, -1));
-
-        return possibleMoves;
     }
 
     public List<Vector2> QueenThreats(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
@@ -303,27 +342,23 @@ public class Piece
         return possibleMoves;
     }
 
-    //TODO add check check and castle.
-    public List<Vector2> KingMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
+    public List<Vector2> KingThreats(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     {
-        List<Vector2> possibleMoves = new List<Vector2>();
+        List<Vector2> possibleThreats = new List<Vector2>();
 
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 1, 0));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, -1, 0));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 0, 1));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 0, -1));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 1, 0));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, -1, 0));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 0, 1));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 0, -1));
 
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 1, 1));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, -1, 1));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, 1, -1));
-        possibleMoves.AddRange(LineMoves(position, player, tiles, pieces, 1, -1, -1));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 1, 1));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, -1, 1));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 1, -1));
+        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, -1, -1));
 
-        List<Vector2> allowedMoves = new List<Vector2>();
-
-        allowedMoves = CheckCheck(possibleMoves, player, tiles);
-
-        return allowedMoves;
+        return possibleThreats;
     }
+    #endregion
 
     List<Vector2> CheckCheck(List<Vector2> possibleMoves, int player, Tile[,] tiles)
     {
@@ -352,23 +387,6 @@ public class Piece
         }
 
         return allowedMoves;
-    }
-
-    public List<Vector2> KingThreats(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
-    {
-        List<Vector2> possibleThreats = new List<Vector2>();
-
-        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 1, 0));
-        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, -1, 0));
-        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 0, 1));
-        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 0, -1));
-
-        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 1, 1));
-        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, -1, 1));
-        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, 1, -1));
-        possibleThreats.AddRange(LineThreats(position, player, tiles, pieces, 1, -1, -1));
-
-        return possibleThreats;
     }
 
     List<Vector2> LineMoves(Vector2 origin, int player, Tile[,] tiles,

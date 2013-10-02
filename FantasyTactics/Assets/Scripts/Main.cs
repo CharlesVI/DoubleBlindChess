@@ -65,7 +65,8 @@ public class Main : MonoBehaviour
             ClearThreats();
             ThreatCheck(tiles);
             CheckCheck();
-            Clear();
+            //CheckMateCheck
+            ClearHighlights();
 
             playerOneReady = false;
             playerTwoReady = false;
@@ -146,12 +147,16 @@ public class Main : MonoBehaviour
             {
                 pieces[ii].player = 2;
                 pieces[ii].gameObject.transform.renderer.material.color = Color.red;
+                pieces[ii].playerColor = Color.red;
+                pieces[ii].movedColor = new Color32(190, 120, 120, 255);
             }
 
             if(ii > 15)
             {
                 pieces[ii].player = 1;
                 pieces[ii].gameObject.transform.renderer.material.color = Color.blue;
+                pieces[ii].playerColor = Color.blue;
+                pieces[ii].movedColor = new Color32(110, 110, 170, 255);
             }
         }
 
@@ -276,6 +281,7 @@ public class Main : MonoBehaviour
             
         }
 
+        //Not sure if this is needed but leaving it for now.
         p1Piece.moved = true;
         p2Piece.moved = true;
 
@@ -404,7 +410,7 @@ public class Main : MonoBehaviour
     {
         foreach (Piece piece in pieces)
         {
-            piece.moved = false;
+            piece.UnMovePiece();
         }
     }
 
@@ -589,9 +595,9 @@ public class Main : MonoBehaviour
                 clickTile(x, y);
             }
 
-            if (clickedPiece.player == whatPlayerAmI)
+            if (clickedPiece.player == whatPlayerAmI && !clickedPiece.moved)
             {
-                Clear();
+                ClearHighlights();
 
                 //Presently this could be converted into a vector2 from what I see. really should stop using world
                 //coords as board ones... lots of /3 errors.
@@ -781,7 +787,7 @@ public class Main : MonoBehaviour
     //However I dont think it will make a performance diffrence and it might even be an
     //advantage not having to go through multipul things and refrence stuff.
 
-    public void Clear()
+    public void ClearHighlights()
     {
         foreach (Tile tile in tiles)
         {
@@ -816,7 +822,7 @@ public class Main : MonoBehaviour
             foreach (Tile tile in tiles)
             {
                 tile.showThreats = !tile.showThreats;
-                Clear();
+                ClearHighlights();
             }
         }
     }//OnGUI
@@ -836,12 +842,12 @@ public class Main : MonoBehaviour
             p2Destination = destination;
             p2Orgin = origin;
         }
-        Clear();
+        ClearHighlights();
     }
 
     public void AbortMove()
     {
-        Clear();
+        ClearHighlights();
     }
 
     public void PlayerSelector()
@@ -851,13 +857,13 @@ public class Main : MonoBehaviour
         if (GUI.Button(new Rect(Screen.width - 130, 50, 120, 40), "BLUE Player"))
         {
             whatPlayerAmI = 1;
-            Clear();
+            ClearHighlights();
         }
 
         if (GUI.Button(new Rect(Screen.width - 130, 10, 120, 40), "RED Player"))
         {
             whatPlayerAmI = 2;
-            Clear();
+            ClearHighlights();
         }
 
         GUI.Label(new Rect(Screen.width - 130, 90, 120, 40), "I am player " + whatPlayerAmI);
@@ -903,8 +909,8 @@ public class Main : MonoBehaviour
                 int x = (int)piece.MyCoordinates().x;
                 int y = (int)piece.MyCoordinates().y;
 
-                Debug.Log(piece.MyCoordinates());
-                Debug.Log("Piece type + player " + tiles[x, y].p1Threat + " " + piece.player);
+                //Debug.Log(piece.MyCoordinates());
+                //Debug.Log("Piece type + player " + tiles[x, y].p1Threat + " " + piece.player);
 
                 if (tiles[x, y].p1Threat && piece.player == 2)
                 {
