@@ -328,7 +328,10 @@ public class Piece
     List<Vector2> CheckCheck(List<Vector2> possibleMoves, int player, Tile[,] tiles)
     {
         //Okay first issue is the king is not "transparent" so you can move into check by say
-        //Moving up a tile when a rook is in your column
+        //Moving up a tile when a rook is in your column will probally have to make a special method
+        // not threat check.
+
+        //Make a secondary board to test possiblitys
 
         List<Vector2> allowedMoves = new List<Vector2>();
 

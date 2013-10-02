@@ -9,7 +9,10 @@ public class Main : MonoBehaviour
     int maxY = 8;
 
     public GameObject tile;
+    
     Tile[,] tiles = new Tile[8, 8];
+
+    Tile[,] virtualTiles = new Tile[8, 8];
 
     public GameObject piecePawn;
     public GameObject pieceBishop;
@@ -43,7 +46,7 @@ public class Main : MonoBehaviour
     {   
         SetupBoard();
         SetupPieces();
-        ThreatCheck();
+        ThreatCheck(tiles);
 	}
 
     // Update is called once per frame
@@ -57,7 +60,7 @@ public class Main : MonoBehaviour
             CaptureAndMove();
             UpdateTileOccupation();
             ClearThreats();
-            ThreatCheck();
+            ThreatCheck(tiles);
             Clear();
 
             playerOneReady = false;
@@ -621,6 +624,8 @@ public class Main : MonoBehaviour
                         break;
 
                     case Piece.Type.KING:
+                        KingStuff(clickedPiece);
+
                         HighlightMoves(clickedPiece.KingMoves(origin, clickedPiece.player,
                             tiles, pieces));
                         break;
@@ -674,7 +679,7 @@ public class Main : MonoBehaviour
 
     }
 
-    void ThreatCheck()
+    void ThreatCheck(Tile[,] tileSet)
     {
         foreach (Piece piece in pieces)
         {
@@ -683,42 +688,42 @@ public class Main : MonoBehaviour
                 case Piece.Type.PAWN:
 
                     RegisterThreat(piece.player, piece.PawnThreats(piece.MyCoordinates(), piece.player,
-                        tiles, pieces));
+                        tileSet, pieces), tileSet);
  
                     break;
 
                 case Piece.Type.BISHOP:
 
                     RegisterThreat(piece.player, piece.BishopThreats(piece.MyCoordinates(), piece.player,
-                        tiles, pieces));
+                        tileSet, pieces), tileSet);
 
                     break;
 
                 case Piece.Type.KNIGHT:
 
                     RegisterThreat(piece.player, piece.KnightThreats(piece.MyCoordinates(), piece.player,
-                        tiles, pieces));
+                        tileSet, pieces), tileSet);
 
                     break;
 
                 case Piece.Type.ROOK:
 
                     RegisterThreat(piece.player, piece.RookThreats(piece.MyCoordinates(), piece.player,
-                        tiles, pieces));
+                        tileSet, pieces), tileSet);
 
                     break;
 
                 case Piece.Type.QUEEN:
 
                     RegisterThreat(piece.player, piece.QueenThreats(piece.MyCoordinates(), piece.player,
-                        tiles, pieces));
+                        tileSet, pieces), tileSet);
 
                     break;
 
                 case Piece.Type.KING:
 
                     RegisterThreat(piece.player, piece.KingThreats(piece.MyCoordinates(), piece.player,
-                        tiles, pieces));
+                        tileSet, pieces), tileSet);
 
                     break;
 
@@ -740,12 +745,12 @@ public class Main : MonoBehaviour
         }
     }
 
-    public void RegisterThreat(int player, List<Vector2> threatList)
+    public void RegisterThreat(int player, List<Vector2> threatList, Tile[,] tileSet)
     {
         foreach (Vector2 threat in threatList)
         {
             //Debug.Log(threatList.Count);
-            Tile tile = tiles[(int)threat.x, (int)threat.y];
+            Tile tile = tileSet[(int)threat.x, (int)threat.y];
             if(player == 1)
             {
                 tile.p1Threat = true;
@@ -855,6 +860,31 @@ public class Main : MonoBehaviour
 
         GUI.Label(new Rect(Screen.width - 130, 130, 120, 40), "Player 2 ready: " + playerTwoReady);
         GUI.Label(new Rect(Screen.width - 130, 170, 120, 40), "Player 1 ready: " + playerOneReady);
+    }
+
+    public void KingStuff(Piece king)
+    {
+       // Piece king = piece;
+
+        for (int xx = 0; xx < 8; xx++) for (int yy = 0; yy < 8; yy++)
+            {
+                virtualTiles[xx, yy] = tiles[xx, yy];
+        }
+
+        int x = (int)king.MyCoordinates().x;
+        int y = (int)king.MyCoordinates().y;
+
+
+
+        //Remove the king in question for check check reasons.
+        virtualTiles[x, y].occupied = false;
+
+        ThreatCheck(virtualTiles);
+
+        //Not sure why I have to do this but it seems like 
+        //virtual Tiles is effecting normal tiles.
+        virtualTiles[x, y].occupied = true;
+        
     }
 }//Class     
 
