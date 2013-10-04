@@ -6,6 +6,7 @@ using System;
 public class Piece
 {
     public GameObject gameObject;
+    public Vector2 position;
     public enum Type { PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING };
     public Type type;
     public int player;
@@ -25,20 +26,27 @@ public class Piece
     {
         this.gameObject.transform.position = new Vector3(go.transform.position.x,
             go.transform.position.y + 1, go.transform.position.z);
+        MovePosition(new Vector2(gameObject.transform.position.x/3,
+            gameObject.transform.position.z/3));
     }
 
-    public void MovePieceTo(Vector2 destination)
+    public void MovePosition(Vector2 destination)
+    {
+        position = destination;
+    }
+
+    public void MoveGameObject(Vector2 destination)
     {
         gameObject.transform.position = new Vector3(destination.x * 3, 1, destination.y * 3);
         moved = true;
         SetMyColor(movedColor);
+        MovePosition(destination);
     }
 
     public void UnMovePiece()
     {
         moved = false;
         SetMyColor(playerColor);
-
     }
 
     void SetMyColor(Color color)
@@ -48,10 +56,7 @@ public class Piece
 
     public Vector2 MyCoordinates()
     {
-        Vector2 location = new Vector2(gameObject.transform.position.x /
-            3, gameObject.transform.position.z / 3);
-
-        return location;
+        return position;
     }
 
     #region moves

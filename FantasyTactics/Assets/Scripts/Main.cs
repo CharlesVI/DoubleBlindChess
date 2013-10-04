@@ -4,6 +4,12 @@ using System.Collections.Generic;
 
 public class Main : MonoBehaviour 
 {
+    // TODO
+    // Pawns need to "bounce" on collision
+    // King + Castle
+    // enPassant
+    // check mate and moving out of check.
+
 
     int maxX = 8;
     int maxY = 8;
@@ -11,8 +17,6 @@ public class Main : MonoBehaviour
     public GameObject tile;
     
     Tile[,] tiles = new Tile[8, 8];
-
-    Tile[,] virtualTiles = new Tile[8, 8];
 
     public GameObject piecePawn;
     public GameObject pieceBishop;
@@ -49,7 +53,7 @@ public class Main : MonoBehaviour
     {   
         SetupBoard();
         SetupPieces();
-        ThreatCheck(tiles);
+        ThreatCheck(tiles, pieces);
 	}
 
     // Update is called once per frame
@@ -61,10 +65,11 @@ public class Main : MonoBehaviour
         {
             UnMovePieces();
             CaptureAndMove();
-            UpdateTileOccupation();
-            ClearThreats();
-            ThreatCheck(tiles);
-            CheckCheck();
+            UpdateTileOccupation(tiles, pieces);
+            ClearThreats(tiles);
+            ThreatCheck(tiles, pieces);
+            p1Check = CheckCheck(1, pieces, tiles);
+            p2Check = CheckCheck(2, pieces, tiles);
             //CheckMateCheck
             ClearHighlights();
 
@@ -73,6 +78,35 @@ public class Main : MonoBehaviour
         }
 
 	}
+
+    void OnGUI()
+    {
+        float btnHeight = 40;
+        float btnWidth = 120;
+
+        if (readyToMove)
+        {
+            if (GUI.Button(new Rect(10, 10, btnWidth, btnHeight), "Confirm Move"))
+            {
+                ConfirmMove();
+            }
+            if (GUI.Button(new Rect(10, 50, btnWidth, btnHeight), "No don't do it!"))
+            {
+                AbortMove();
+            }          
+        }
+        PlayerSelector();
+
+        //Later put in a config Menu
+        if (GUI.Button(new Rect(10, Screen.height - 50, btnWidth, btnHeight), "Threat On/Off"))
+        {
+            foreach (Tile tile in tiles)
+            {
+                tile.showThreats = !tile.showThreats;
+                ClearHighlights();
+            }
+        }
+    }//OnGUI
 
 	void SetupBoard()
     {
@@ -240,6 +274,142 @@ public class Main : MonoBehaviour
         }
     }//GetInput
 
+    void LeftClickLogic(RaycastHit hit)
+    {
+        string tagPiece = "Piece";
+        string tagTile = "Tile";
+
+        if (hit.collider.gameObject.tag == tagPiece)
+        {
+            Piece clickedPiece = new Piece();
+            
+            //Find out what kind of piece I clicked in the list of pieces that exist.
+            foreach (Piece piece in pieces)
+            {
+                if (hit.collider.gameObject.transform.position == piece.gameObject.transform.position)
+                {
+                    clickedPiece = piece;
+                    
+                }
+            }
+
+            //Make sure the piece is owned by the player.
+            if (clickedPiece.player != whatPlayerAmI)
+            { 
+                int x = (int)clickedPiece.gameObject.transform.position.x / 3;
+                int y = (int)clickedPiece.gameObject.transform.position.z / 3;
+
+                clickTile(x, y);
+            }
+
+            if (clickedPiece.player == whatPlayerAmI && !clickedPiece.moved)
+            {
+                ClearHighlights();
+
+                //Presently this could be converted into a vector2 from what I see. really should stop using world
+                //coords as board ones... lots of /3 errors.
+                //Vector3 position = clickedPiece.gameObject.transform.position;
+
+                origin = clickedPiece.MyCoordinates();
+                //Determin where that peice may move / attack
+
+                List<Vector2> possibleMoves = new List<Vector2>();
+
+                switch (clickedPiece.type)
+                {
+                    case Piece.Type.PAWN:
+                        //TODO attack and enpassant 
+                        possibleMoves =ClickedPieceMoves(clickedPiece);
+                        break;
+
+                    case Piece.Type.BISHOP:
+                        possibleMoves =ClickedPieceMoves(clickedPiece);
+                        break;
+
+                    case Piece.Type.KNIGHT:
+                        possibleMoves =ClickedPieceMoves(clickedPiece);
+                        break;
+
+                    case Piece.Type.ROOK:
+                        possibleMoves =ClickedPieceMoves(clickedPiece);
+                        break;
+
+                    case Piece.Type.QUEEN:
+                        possibleMoves =ClickedPieceMoves(clickedPiece);
+                        break;
+
+                    case Piece.Type.KING:
+                        KingStuff(clickedPiece);
+
+                        possibleMoves =ClickedPieceMoves(clickedPiece);
+                        break;
+
+                    default:
+                        Debug.Log("Something wrong in piece type");
+                        break;
+                }//Piece selection
+
+                if (whatPlayerAmI == 1 && p1Check)
+                {
+                    HighlightMoves(GetOutOfCheck(possibleMoves, clickedPiece));
+                }
+
+                if (whatPlayerAmI == 1 && !p1Check)
+                {
+                    HighlightMoves(possibleMoves);
+                }
+
+                if (whatPlayerAmI == 2 && p2Check)
+                {
+                    HighlightMoves(GetOutOfCheck(possibleMoves, clickedPiece));
+                }
+
+                if (whatPlayerAmI == 2 && !p2Check)
+                {
+                    HighlightMoves(possibleMoves);
+                }
+            }//Ownership Check
+        }
+
+        if (hit.collider.gameObject.tag == tagTile)
+        {     
+            int x = (int)hit.collider.gameObject.transform.position.x / 3;
+            int y = (int)hit.collider.gameObject.transform.position.z / 3;
+
+            clickTile(x, y);
+        }//Shoot tile.
+
+    }//Left Click Logic
+
+    public void clickTile(int x, int y)
+    {
+        //This is so we can click "through" a piece if needed. I'm passing coords not
+        //Tiles[] just cuz. can change later if needed.
+
+        Tile selectedTile = new Tile();
+
+        selectedTile = tiles[x, y];
+
+        //If its a blue tile set it as the intended destination and clear any other
+        //possible destination
+        if (selectedTile.moveable)
+        {
+            foreach (Tile tile in tiles)
+            {
+                if (tile.destination)
+                {
+                    tile.Moveable();
+                }
+            }
+
+            selectedTile.Destination();
+            destination = new Vector2(x, y);
+            readyToMove = true;
+        }
+
+
+    }
+
     void CaptureAndMove()
     { 
         //Note on collisions: Peice A moves into where peice B is leaving is a collision iff
@@ -394,13 +564,13 @@ public class Main : MonoBehaviour
 
         if (p1Destination == p2Orgin)
         {
-            MovePieces(p2Orgin, p2Destination);
-            MovePieces(p1Origin, p1Destination);
+            MoveGameObject(p2Orgin, p2Destination, pieces);
+            MoveGameObject(p1Origin, p1Destination, pieces );
         }
         else
         {
-            MovePieces(p1Origin, p1Destination);
-            MovePieces(p2Orgin, p2Destination);
+            MoveGameObject(p1Origin, p1Destination, pieces);
+            MoveGameObject(p2Orgin, p2Destination, pieces);
         }
         //TODO LOG MOVES
 
@@ -428,6 +598,7 @@ public class Main : MonoBehaviour
         return Piece.Type.KING;
     }
 
+    #region movement stuff
     Vector2 KnightDirection(int x1, int x2, int y1, int y2)
     {
         Vector2 direction = new Vector2();
@@ -506,6 +677,21 @@ public class Main : MonoBehaviour
         }
     }
 
+    void MoveGameObject(Vector2 origin, Vector2 destination, Piece[] pieceSet)
+    {
+        foreach (Piece piece in pieceSet)
+        {
+            if (piece.gameObject.transform.position.x / 3 == origin.x &&
+                piece.gameObject.transform.position.z / 3 == origin.y)
+            {
+                piece.MoveGameObject(destination);
+            }
+        }
+        //tiles[(int)origin.x, (int)origin.y].occupied = false;
+        //tiles[(int)destination.x, (int)destination.y].occupied = true; //This causes an error on capture.
+    }
+    #endregion
+
     void CaptureCheck(Vector2 destination)
     {
 
@@ -517,20 +703,6 @@ public class Main : MonoBehaviour
                 CaptureLocation(destination);
             }
         }
-    }
-
-    void MovePieces(Vector2 origin, Vector2 destination)
-    {
-        foreach (Piece piece in pieces)
-        {
-            if (piece.gameObject.transform.position.x / 3 == origin.x &&
-                piece.gameObject.transform.position.z / 3 == origin.y)
-            {
-                piece.MovePieceTo(destination);
-            }
-        }
-        //tiles[(int)origin.x, (int)origin.y].occupied = false;
-        //tiles[(int)destination.x, (int)destination.y].occupied = true; //This causes an error on capture.
     }
 
     void CaptureLocation(Vector2 location)
@@ -554,7 +726,7 @@ public class Main : MonoBehaviour
 
     }
 
-    void UpdateTileOccupation()
+    void UpdateTileOccupation(Tile[,] tiles, Piece[] pieces)
     {
         foreach (Tile tile in tiles)
         {
@@ -567,131 +739,127 @@ public class Main : MonoBehaviour
         }
     }
 
-    void LeftClickLogic(RaycastHit hit)
+    List<Vector2> ClickedPieceMoves(Piece clickedPiece)
     {
-        string tagPiece = "Piece";
-        string tagTile = "Tile";
+        List<Vector2> possibleMoves = new List<Vector2>();
 
-        if (hit.collider.gameObject.tag == tagPiece)
+        switch (clickedPiece.type)
         {
-            Piece clickedPiece = new Piece();
-            
-            //Find out what kind of piece I clicked in the list of pieces that exist.
-            foreach (Piece piece in pieces)
-            {
-                if (hit.collider.gameObject.transform.position == piece.gameObject.transform.position)
-                {
-                    clickedPiece = piece;
-                    
-                }
-            }
+            case Piece.Type.PAWN:
+                //TODO attack and enpassant 
+                possibleMoves = clickedPiece.PawnMoves(origin, clickedPiece.player, tiles,
+                    pieces);
+                break;
 
-            //Make sure the piece is owned by the player.
-            if (clickedPiece.player != whatPlayerAmI)
-            { 
-                int x = (int)clickedPiece.gameObject.transform.position.x / 3;
-                int y = (int)clickedPiece.gameObject.transform.position.z / 3;
+            case Piece.Type.BISHOP:
+                possibleMoves = clickedPiece.BishopMoves(origin, clickedPiece.player,
+                    tiles, pieces);
+                break;
 
-                clickTile(x, y);
-            }
+            case Piece.Type.KNIGHT:
+                possibleMoves = clickedPiece.KnightMoves(origin, clickedPiece.player,
+                    tiles, pieces);
+                break;
 
-            if (clickedPiece.player == whatPlayerAmI && !clickedPiece.moved)
-            {
-                ClearHighlights();
+            case Piece.Type.ROOK:
+                possibleMoves = clickedPiece.RookMoves(origin, clickedPiece.player,
+                    tiles, pieces);
+                break;
 
-                //Presently this could be converted into a vector2 from what I see. really should stop using world
-                //coords as board ones... lots of /3 errors.
-                Vector3 position = clickedPiece.gameObject.transform.position;
+            case Piece.Type.QUEEN:
+                possibleMoves = clickedPiece.QueenMoves(origin, clickedPiece.player,
+                    tiles, pieces);
+                break;
 
-                origin = new Vector2(position.x / 3, position.z / 3);
-                //Determin where that peice may move / attack
-                switch (clickedPiece.type)
-                {
-                    case Piece.Type.PAWN:
-                        //TODO attack and enpassant 
-                        HighlightMoves(clickedPiece.PawnMoves(origin, clickedPiece.player, tiles,
-                            pieces));
-                        break;
+            case Piece.Type.KING:
+                KingStuff(clickedPiece);
 
-                    case Piece.Type.BISHOP:
-                        HighlightMoves(clickedPiece.BishopMoves(origin, clickedPiece.player,
-                            tiles, pieces));
-                        break;
+                possibleMoves = clickedPiece.KingMoves(origin, clickedPiece.player,
+                    tiles, pieces);
+                break;
 
-                    case Piece.Type.KNIGHT:
-                        HighlightMoves(clickedPiece.KnightMoves(origin, clickedPiece.player,
-                            tiles, pieces));
-                        break;
-
-                    case Piece.Type.ROOK:
-                        HighlightMoves(clickedPiece.RookMoves(origin, clickedPiece.player,
-                            tiles, pieces));
-                        break;
-
-                    case Piece.Type.QUEEN:
-                        HighlightMoves(clickedPiece.QueenMoves(origin, clickedPiece.player,
-                            tiles, pieces));
-                        break;
-
-                    case Piece.Type.KING:
-                        KingStuff(clickedPiece);
-
-                        HighlightMoves(clickedPiece.KingMoves(origin, clickedPiece.player,
-                            tiles, pieces));
-                        break;
-
-                    default:
-                        Debug.Log("Something wrong in piece type");
-                        break;
-                }
-            }//Ownership Check
+            default:
+                Debug.Log("Something wrong in piece type");
+                break;
         }
 
-
-        if (hit.collider.gameObject.tag == tagTile)
-        {
-            
-
-            int x = (int)hit.collider.gameObject.transform.position.x / 3;
-            int y = (int)hit.collider.gameObject.transform.position.z / 3;
-
-            clickTile(x, y);
-                       
-        }
-    }//Left Click Logic
-
-    public void clickTile(int x, int y)
-    {
-        //This is so we can click "through" a piece if needed. I'm passing coords not
-        //Tiles[] just cuz. can change later if needed.
-
-        Tile selectedTile = new Tile();
-
-        selectedTile = tiles[x, y];
-
-        //If its a blue tile set it as the intended destination and clear any other
-        //possible destination
-        if (selectedTile.moveable)
-        {
-            foreach (Tile tile in tiles)
-            {
-                if (tile.destination)
-                {
-                    tile.Moveable();
-                }
-            }
-
-            selectedTile.Destination();
-            destination = new Vector2(x, y);
-            readyToMove = true;
-        }
-
-
+        return possibleMoves;
     }
 
-    void ThreatCheck(Tile[,] tileSet)
+    public void HighlightMoves(List<Vector2> moveList)
     {
-        foreach (Piece piece in pieces)
+        foreach( Vector2 move in moveList)
+        {
+            tiles[(int)move.x, (int)move.y].Moveable();
+        }
+    }
+
+    //I could probally save the list and only undo the tiles that are actually highlighted
+    //However I dont think it will make a performance diffrence and it might even be an
+    //advantage not having to go through multipul things and refrence stuff.
+
+    public void ClearHighlights()
+    {
+        foreach (Tile tile in tiles)
+        {
+            tile.UnHighlight();
+        }
+        origin = new Vector2(9, 9); 
+        destination = new Vector2(9, 9); // setting these two to null really is not needed. but it might trap errors.
+        readyToMove = false;
+    }
+
+    public void ConfirmMove()
+    {
+        if (whatPlayerAmI == 1)
+        {
+            playerOneReady = true;
+            p1Destination = destination;
+            p1Origin = origin;
+        }
+
+        if (whatPlayerAmI == 2)
+        {
+            playerTwoReady = true;
+            p2Destination = destination;
+            p2Orgin = origin;
+        }
+        ClearHighlights();
+    }
+
+    public void AbortMove()
+    {
+        ClearHighlights();
+    }
+
+    public void PlayerSelector()
+    {
+        
+
+        if (GUI.Button(new Rect(Screen.width - 130, 50, 120, 40), "BLUE Player"))
+        {
+            whatPlayerAmI = 1;
+            ClearHighlights();
+        }
+
+        if (GUI.Button(new Rect(Screen.width - 130, 10, 120, 40), "RED Player"))
+        {
+            whatPlayerAmI = 2;
+            ClearHighlights();
+        }
+
+        GUI.Label(new Rect(Screen.width - 130, 90, 120, 40), "I am player " + whatPlayerAmI);
+
+        GUI.Label(new Rect(Screen.width - 130, 130, 120, 40), "Player 2 ready: " + playerTwoReady);
+        GUI.Label(new Rect(Screen.width - 130, 170, 120, 40), "Player 1 ready: " + playerOneReady);
+        GUI.Label(new Rect(Screen.width - 130, 210, 120, 40), "Player 1 check? " + p1Check);
+        GUI.Label(new Rect(Screen.width - 130, 250, 120, 40), "Player 2 check? " + p2Check);
+    }
+
+    #region threat & check logic
+    void ThreatCheck(Tile[,] tileSet, Piece[] pieceSet)
+    {
+        foreach (Piece piece in pieceSet)
         {
             switch (piece.type)
             {
@@ -746,15 +914,6 @@ public class Main : MonoBehaviour
     
     }
 
-    void ClearThreats()
-    {
-        foreach (Tile tile in tiles)
-        {
-            tile.p1Threat = false;
-            tile.p2Threat = false;
-        }
-    }
-
     public void RegisterThreat(int player, List<Vector2> threatList, Tile[,] tileSet)
     {
         foreach (Vector2 threat in threatList)
@@ -775,123 +934,33 @@ public class Main : MonoBehaviour
         }
     }
 
-    public void HighlightMoves(List<Vector2> moveList)
-    {
-        foreach( Vector2 move in moveList)
-        {
-            tiles[(int)move.x, (int)move.y].Moveable();
-        }
-    }
-
-    //I could probally save the list and only undo the tiles that are actually highlighted
-    //However I dont think it will make a performance diffrence and it might even be an
-    //advantage not having to go through multipul things and refrence stuff.
-
-    public void ClearHighlights()
+    void ClearThreats(Tile[,] tiles)
     {
         foreach (Tile tile in tiles)
         {
-            tile.UnHighlight();
+            tile.p1Threat = false;
+            tile.p2Threat = false;
         }
-        origin = new Vector2(9, 9); 
-        destination = new Vector2(9, 9); // setting these two to null really is not needed. but it might trap errors.
-        readyToMove = false;
-    }
-
-    void OnGUI()
-    {
-        float btnHeight = 40;
-        float btnWidth = 120;
-
-        if (readyToMove)
-        {
-            if (GUI.Button(new Rect(10, 10, btnWidth, btnHeight), "Confirm Move"))
-            {
-                ConfirmMove();
-            }
-            if (GUI.Button(new Rect(10, 50, btnWidth, btnHeight), "No don't do it!"))
-            {
-                AbortMove();
-            }          
-        }
-        PlayerSelector();
-
-        //Later put in a config Menu
-        if (GUI.Button(new Rect(10, Screen.height - 50, btnWidth, btnHeight), "Threat On/Off"))
-        {
-            foreach (Tile tile in tiles)
-            {
-                tile.showThreats = !tile.showThreats;
-                ClearHighlights();
-            }
-        }
-    }//OnGUI
-
-    public void ConfirmMove()
-    {
-        if (whatPlayerAmI == 1)
-        {
-            playerOneReady = true;
-            p1Destination = destination;
-            p1Origin = origin;
-        }
-
-        if (whatPlayerAmI == 2)
-        {
-            playerTwoReady = true;
-            p2Destination = destination;
-            p2Orgin = origin;
-        }
-        ClearHighlights();
-    }
-
-    public void AbortMove()
-    {
-        ClearHighlights();
-    }
-
-    public void PlayerSelector()
-    {
-        
-
-        if (GUI.Button(new Rect(Screen.width - 130, 50, 120, 40), "BLUE Player"))
-        {
-            whatPlayerAmI = 1;
-            ClearHighlights();
-        }
-
-        if (GUI.Button(new Rect(Screen.width - 130, 10, 120, 40), "RED Player"))
-        {
-            whatPlayerAmI = 2;
-            ClearHighlights();
-        }
-
-        GUI.Label(new Rect(Screen.width - 130, 90, 120, 40), "I am player " + whatPlayerAmI);
-
-        GUI.Label(new Rect(Screen.width - 130, 130, 120, 40), "Player 2 ready: " + playerTwoReady);
-        GUI.Label(new Rect(Screen.width - 130, 170, 120, 40), "Player 1 ready: " + playerOneReady);
-        GUI.Label(new Rect(Screen.width - 130, 210, 120, 40), "Player 1 check? " + p1Check);
-        GUI.Label(new Rect(Screen.width - 130, 250, 120, 40), "Player 2 check? " + p2Check);
     }
 
     public void KingStuff(Piece king)
     {
        // Piece king = piece;
+        Piece[] virtualPieces = MakeVirtualPieces(pieces);
+        //So this never explicitly checks for check and it seems like virtual tiles and tiles are not seperate
+        // in any way. it seems to set the threats for bot hset and the only reason 
+        // it works is b/c it sets occupied back to where it belongs but the whole 'virtual tiles' 
+        //is innefective.
+        Tile[,] virtualTiles = MakeVirtualTiles(tiles);
 
-        for (int xx = 0; xx < 8; xx++) for (int yy = 0; yy < 8; yy++)
-            {
-                virtualTiles[xx, yy] = tiles[xx, yy];
-        }
 
         int x = (int)king.MyCoordinates().x;
         int y = (int)king.MyCoordinates().y;
 
-
-
         //Remove the king in question for check check reasons.
         virtualTiles[x, y].occupied = false;
 
-        ThreatCheck(virtualTiles);
+        ThreatCheck(virtualTiles, virtualPieces);
 
         //Not sure why I have to do this but it seems like 
         //virtual Tiles is effecting normal tiles. However it seems
@@ -900,37 +969,135 @@ public class Main : MonoBehaviour
         
     }
 
-    public void CheckCheck()
+    public bool CheckCheck(int player, Piece[] pieceSet, Tile[,] tileSet)
     {
-        foreach (Piece piece in pieces)
+        bool check = false;
+
+        foreach (Piece piece in pieceSet)
         {
-            if (piece.type == Piece.Type.KING)
+            if (piece.type == Piece.Type.KING && piece.player == player)
             {
                 int x = (int)piece.MyCoordinates().x;
                 int y = (int)piece.MyCoordinates().y;
 
-                //Debug.Log(piece.MyCoordinates());
                 //Debug.Log("Piece type + player " + tiles[x, y].p1Threat + " " + piece.player);
 
-                if (tiles[x, y].p1Threat && piece.player == 2)
+                if (player == 2)
                 {
-                    p2Check = true;
-                }
-                else if (!tiles[x,y].p1Threat && piece.player == 2)
-                {
-                    p2Check = false;
+                    if (tileSet[x, y].p1Threat)
+                    {
+                        check = true;
+                    }
+                    else if (!tileSet[x, y].p1Threat)
+                    {
+                        check = false;
+                    }
                 }
 
-                if (tiles[x, y].p2Threat && piece.player == 1)
+                if (player == 1)
                 {
-                    p1Check = true;
-                }
-                else if (!tiles[x, y].p2Threat && piece.player == 1)
-                {
-                    p1Check = false;
+                    if (tileSet[x, y].p2Threat)
+                    {
+                        check = true;
+                    }
+                    else if (!tileSet[x, y].p2Threat)
+                    {
+                        check = false;
+                    }
                 }
             }
         }
+        return check;
     }
+
+    List<Vector2> GetOutOfCheck(List<Vector2> moves, Piece piece)
+    {
+
+        //By the time I get here I get 6 make Virtual Piece calls gotta fix that.
+        List<Vector2> allowedMoves = new List<Vector2>();
+
+        Tile[,] virtualTiles = MakeVirtualTiles(tiles);
+        Piece[] virtualPieces = MakeVirtualPieces(pieces);
+        Piece virtualPiece = new Piece();
+
+        Debug.Log(piece.MyCoordinates() + "" + piece.type);
+        foreach (Piece vPiece in virtualPieces)
+        {
+            if (piece.MyCoordinates() == vPiece.MyCoordinates())
+            {
+                Debug.Log(piece.MyCoordinates() + "" + piece.type);
+                virtualPiece = vPiece;
+            }
+        }
+
+        Vector2 origin = virtualPiece.MyCoordinates();
+
+        //Presently the game object is still refrenced and its not working well.
+        //May have to break up the game object coordinates and movement / position apart.
+        //May have to merge tile and piece. Color comes back after move is resolved so I can probally get away with seperating movement and color out.
+        //threat blocks still do not work.
+
+        foreach (Vector2 move in moves) //The problem here is occupation is not what threat check uses. It need piece.
+        {
+            Debug.Log(virtualPiece.type);
+
+            virtualPiece.MovePosition(move);
+
+            Debug.Log(virtualPiece.MyCoordinates());
+
+            UpdateTileOccupation(virtualTiles, virtualPieces);
+            
+            ClearThreats(virtualTiles);
+            
+            ThreatCheck(virtualTiles, virtualPieces); 
+
+            if (!CheckCheck(virtualPiece.player, virtualPieces, virtualTiles))
+            {
+                allowedMoves.Add(move);
+            }
+
+            //Blocking now works however some pieces will get "overwritten and not everything then works. Also the king has replaced some of his own men at times.
+            virtualPiece.MovePosition(origin);
+            //May have to re set the occupation to original.
+
+        }
+
+        return allowedMoves;
+    }
+    #endregion
+
+    Tile[,] MakeVirtualTiles(Tile[,] tileSet)
+    {
+        Tile[,] virtualTiles = new Tile[8, 8];
+
+        for (int xx = 0; xx < 8; xx++)
+        {
+            for (int yy = 0; yy < 8; yy++)
+            {
+                virtualTiles[xx, yy] = new Tile();
+                virtualTiles[xx, yy].occupied = tileSet[xx, yy].occupied;
+            }
+        }
+        return virtualTiles;
+    }
+
+    //At this moment I would really like to note that I probally should have just had peices
+    //and tile combined, at the very least make peices a [,] and do away with bool occupied in tile.
+    Piece[] MakeVirtualPieces(Piece[] pieceSet)
+    {
+        Piece[] virtualPieces = new Piece[32];
+        
+        for(int ii = 0; ii < 32; ii++)
+        {
+            virtualPieces[ii] = new Piece();
+            virtualPieces[ii].position = pieceSet[ii].position;
+            virtualPieces[ii].type = pieceSet[ii].type;
+            virtualPieces[ii].player = pieceSet[ii].player;
+            virtualPieces[ii].moved = pieceSet[ii].moved;
+        }
+
+        return virtualPieces;
+    }
+
 }//Class     
 
