@@ -306,42 +306,41 @@ public class Main : MonoBehaviour
             {
                 ClearHighlights();
 
-                //Presently this could be converted into a vector2 from what I see. really should stop using world
-                //coords as board ones... lots of /3 errors.
-                //Vector3 position = clickedPiece.gameObject.transform.position;
-
                 origin = clickedPiece.MyCoordinates();
                 //Determin where that peice may move / attack
 
                 List<Vector2> possibleMoves = new List<Vector2>();
 
+                //TODO so right here I think all the non King Pieces need a filter
+                //That will run with their moves and the kings COORDs to see if they 
+                //Put him in check.
                 switch (clickedPiece.type)
                 {
                     case Piece.Type.PAWN:
                         //TODO attack and enpassant 
-                        possibleMoves =ClickedPieceMoves(clickedPiece);
+                        possibleMoves = IsTheKingPutInCheck(ClickedPieceMoves(clickedPiece), clickedPiece);
                         break;
 
                     case Piece.Type.BISHOP:
-                        possibleMoves =ClickedPieceMoves(clickedPiece);
+                        possibleMoves = ClickedPieceMoves(clickedPiece);
                         break;
 
                     case Piece.Type.KNIGHT:
-                        possibleMoves =ClickedPieceMoves(clickedPiece);
+                        possibleMoves = ClickedPieceMoves(clickedPiece);
                         break;
 
                     case Piece.Type.ROOK:
-                        possibleMoves =ClickedPieceMoves(clickedPiece);
+                        possibleMoves = ClickedPieceMoves(clickedPiece);
                         break;
 
                     case Piece.Type.QUEEN:
-                        possibleMoves =ClickedPieceMoves(clickedPiece);
+                        possibleMoves = ClickedPieceMoves(clickedPiece);
                         break;
 
                     case Piece.Type.KING:
                         KingStuff(clickedPiece);
 
-                        possibleMoves =ClickedPieceMoves(clickedPiece);
+                        possibleMoves = ClickedPieceMoves(clickedPiece);
                         break;
 
                     default:
@@ -369,7 +368,7 @@ public class Main : MonoBehaviour
                     HighlightMoves(possibleMoves);
                 }
             }//Ownership Check
-        }
+        }//Clicked a Piece
 
         if (hit.collider.gameObject.tag == tagTile)
         {     
@@ -598,7 +597,55 @@ public class Main : MonoBehaviour
         return Piece.Type.KING;
     }
 
-    #region movement stuff
+    #region movement stuff 
+
+    List<Vector2> ClickedPieceMoves(Piece clickedPiece)
+    {
+        List<Vector2> possibleMoves = new List<Vector2>();
+
+        switch (clickedPiece.type)
+        {
+            case Piece.Type.PAWN:
+                //TODO attack and enpassant 
+                possibleMoves = clickedPiece.PawnMoves(origin, clickedPiece.player, tiles,
+                    pieces);
+                break;
+
+            case Piece.Type.BISHOP:
+                possibleMoves = clickedPiece.BishopMoves(origin, clickedPiece.player,
+                    tiles, pieces);
+                break;
+
+            case Piece.Type.KNIGHT:
+                possibleMoves = clickedPiece.KnightMoves(origin, clickedPiece.player,
+                    tiles, pieces);
+                break;
+
+            case Piece.Type.ROOK:
+                possibleMoves = clickedPiece.RookMoves(origin, clickedPiece.player,
+                    tiles, pieces);
+                break;
+
+            case Piece.Type.QUEEN:
+                possibleMoves = clickedPiece.QueenMoves(origin, clickedPiece.player,
+                    tiles, pieces);
+                break;
+
+            case Piece.Type.KING:
+                KingStuff(clickedPiece);
+
+                possibleMoves = clickedPiece.KingMoves(origin, clickedPiece.player,
+                    tiles, pieces);
+                break;
+
+            default:
+                Debug.Log("Something wrong in piece type");
+                break;
+        }
+
+        return possibleMoves;
+    }
+
     Vector2 KnightDirection(int x1, int x2, int y1, int y2)
     {
         Vector2 direction = new Vector2();
@@ -739,53 +786,6 @@ public class Main : MonoBehaviour
         }
     }
 
-    List<Vector2> ClickedPieceMoves(Piece clickedPiece)
-    {
-        List<Vector2> possibleMoves = new List<Vector2>();
-
-        switch (clickedPiece.type)
-        {
-            case Piece.Type.PAWN:
-                //TODO attack and enpassant 
-                possibleMoves = clickedPiece.PawnMoves(origin, clickedPiece.player, tiles,
-                    pieces);
-                break;
-
-            case Piece.Type.BISHOP:
-                possibleMoves = clickedPiece.BishopMoves(origin, clickedPiece.player,
-                    tiles, pieces);
-                break;
-
-            case Piece.Type.KNIGHT:
-                possibleMoves = clickedPiece.KnightMoves(origin, clickedPiece.player,
-                    tiles, pieces);
-                break;
-
-            case Piece.Type.ROOK:
-                possibleMoves = clickedPiece.RookMoves(origin, clickedPiece.player,
-                    tiles, pieces);
-                break;
-
-            case Piece.Type.QUEEN:
-                possibleMoves = clickedPiece.QueenMoves(origin, clickedPiece.player,
-                    tiles, pieces);
-                break;
-
-            case Piece.Type.KING:
-                KingStuff(clickedPiece);
-
-                possibleMoves = clickedPiece.KingMoves(origin, clickedPiece.player,
-                    tiles, pieces);
-                break;
-
-            default:
-                Debug.Log("Something wrong in piece type");
-                break;
-        }
-
-        return possibleMoves;
-    }
-
     public void HighlightMoves(List<Vector2> moveList)
     {
         foreach( Vector2 move in moveList)
@@ -857,6 +857,7 @@ public class Main : MonoBehaviour
     }
 
     #region threat & check logic
+
     void ThreatCheck(Tile[,] tileSet, Piece[] pieceSet)
     {
         foreach (Piece piece in pieceSet)
@@ -943,34 +944,31 @@ public class Main : MonoBehaviour
         }
     }
 
-    public void KingStuff(Piece king)
+    public void KingStuff(Piece piece)
     {
-       // Piece king = piece;
+        //Removes the king momentarily from the board to 
+        // Accurately check if his move would put him in check
+        // Namely if he retreats along a line of attack.
+
         Piece[] virtualPieces = MakeVirtualPieces(pieces);
-        //So this never explicitly checks for check and it seems like virtual tiles and tiles are not seperate
-        // in any way. it seems to set the threats for bot hset and the only reason 
-        // it works is b/c it sets occupied back to where it belongs but the whole 'virtual tiles' 
-        //is innefective.
+
         Tile[,] virtualTiles = MakeVirtualTiles(tiles);
 
-
-        int x = (int)king.MyCoordinates().x;
-        int y = (int)king.MyCoordinates().y;
+        int x = (int)piece.MyCoordinates().x;
+        int y = (int)piece.MyCoordinates().y;
 
         //Remove the king in question for check check reasons.
         virtualTiles[x, y].occupied = false;
 
         ThreatCheck(virtualTiles, virtualPieces);
 
-        //Not sure why I have to do this but it seems like 
-        //virtual Tiles is effecting normal tiles. However it seems
-        //To be working so I'll move on with this fix.
         virtualTiles[x, y].occupied = true;
         
     }
 
     public bool CheckCheck(int player, Piece[] pieceSet, Tile[,] tileSet)
     {
+        //Simply Returns False if not in check and true if you are.
         bool check = false;
 
         foreach (Piece piece in pieceSet)
@@ -1008,6 +1006,59 @@ public class Main : MonoBehaviour
             }
         }
         return check;
+    }
+
+    List<Vector2> IsTheKingPutInCheck(List<Vector2> moves, Piece piece)
+    {
+        //In this method I am going to simulate the board state and then
+        //Move the piece in question to see if its movement will open
+        //an attack route to the king, if it does the move will be prohibited.
+
+
+        //NOTE presently not working, simply just not doing its job. I think tile occupation
+        //Needs to be changed. 
+
+        List<Vector2> allowedMoves = new List<Vector2>();
+
+        Tile[,] clonedTiles = MakeVirtualTiles(tiles);
+        
+        Piece[] clonedPieces = MakeVirtualPieces(pieces);
+
+        Piece pieceClone = new Piece();
+
+        foreach (Piece clonedPiece in clonedPieces)
+        {
+            if (clonedPiece.MyCoordinates() == piece.MyCoordinates())
+            {
+                Debug.Log("this happened");
+                pieceClone = clonedPiece;
+            }
+        }
+
+        Vector2 origin = piece.MyCoordinates();
+        Debug.Log(pieceClone.MyCoordinates());
+        foreach (Vector2 move in moves)
+        {
+            pieceClone.MovePosition(move);
+
+            //These did not help
+            clonedTiles[(int)origin.x, (int)origin.y].occupied = false;
+            clonedTiles[(int)move.x, (int)move.y].occupied = true;
+
+            ThreatCheck(clonedTiles, clonedPieces);
+
+            if (!CheckCheck(pieceClone.player, clonedPieces, clonedTiles))
+            {
+                allowedMoves.Add(move);
+            }
+
+            pieceClone.MovePosition(origin);
+
+            clonedTiles[(int)origin.x, (int)origin.y].occupied = true;
+            clonedTiles[(int)move.x, (int)move.y].occupied = false;
+        }
+
+        return allowedMoves;
     }
 
     List<Vector2> GetOutOfCheck(List<Vector2> moves, Piece piece)
@@ -1064,6 +1115,7 @@ public class Main : MonoBehaviour
 
         return allowedMoves;
     }
+
     #endregion
 
     Tile[,] MakeVirtualTiles(Tile[,] tileSet)
