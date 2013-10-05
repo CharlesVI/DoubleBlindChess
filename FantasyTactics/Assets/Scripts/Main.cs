@@ -862,57 +862,58 @@ public class Main : MonoBehaviour
     {
         foreach (Piece piece in pieceSet)
         {
-            switch (piece.type)
+            if (!piece.moved)
             {
-                case Piece.Type.PAWN:
+                switch (piece.type)
+                {
+                    case Piece.Type.PAWN:
 
-                    RegisterThreat(piece.player, piece.PawnThreats(piece.MyCoordinates(), piece.player,
-                        tileSet, pieces), tileSet);
- 
-                    break;
+                        RegisterThreat(piece.player, piece.PawnThreats(piece.MyCoordinates(), piece.player,
+                            tileSet, pieces), tileSet);
 
-                case Piece.Type.BISHOP:
+                        break;
 
-                    RegisterThreat(piece.player, piece.BishopThreats(piece.MyCoordinates(), piece.player,
-                        tileSet, pieces), tileSet);
+                    case Piece.Type.BISHOP:
 
-                    break;
+                        RegisterThreat(piece.player, piece.BishopThreats(piece.MyCoordinates(), piece.player,
+                            tileSet, pieces), tileSet);
 
-                case Piece.Type.KNIGHT:
+                        break;
 
-                    RegisterThreat(piece.player, piece.KnightThreats(piece.MyCoordinates(), piece.player,
-                        tileSet, pieces), tileSet);
+                    case Piece.Type.KNIGHT:
 
-                    break;
+                        RegisterThreat(piece.player, piece.KnightThreats(piece.MyCoordinates(), piece.player,
+                            tileSet, pieces), tileSet);
 
-                case Piece.Type.ROOK:
+                        break;
 
-                    RegisterThreat(piece.player, piece.RookThreats(piece.MyCoordinates(), piece.player,
-                        tileSet, pieces), tileSet);
+                    case Piece.Type.ROOK:
 
-                    break;
+                        RegisterThreat(piece.player, piece.RookThreats(piece.MyCoordinates(), piece.player,
+                            tileSet, pieces), tileSet);
 
-                case Piece.Type.QUEEN:
+                        break;
 
-                    RegisterThreat(piece.player, piece.QueenThreats(piece.MyCoordinates(), piece.player,
-                        tileSet, pieces), tileSet);
+                    case Piece.Type.QUEEN:
 
-                    break;
+                        RegisterThreat(piece.player, piece.QueenThreats(piece.MyCoordinates(), piece.player,
+                            tileSet, pieces), tileSet);
 
-                case Piece.Type.KING:
+                        break;
 
-                    RegisterThreat(piece.player, piece.KingThreats(piece.MyCoordinates(), piece.player,
-                        tileSet, pieces), tileSet);
+                    case Piece.Type.KING:
 
-                    break;
+                        RegisterThreat(piece.player, piece.KingThreats(piece.MyCoordinates(), piece.player,
+                            tileSet, pieces), tileSet);
 
-                default:
-                    Debug.Log("Something wrong in piece type");
-                    break;
-            }
-        
-        }
-    
+                        break;
+
+                    default:
+                        Debug.Log("Something wrong in piece type");
+                        break;
+                }
+            }//If moved
+        }//for each piece
     }
 
     public void RegisterThreat(int player, List<Vector2> threatList, Tile[,] tileSet)
@@ -1030,13 +1031,12 @@ public class Main : MonoBehaviour
         {
             if (clonedPiece.MyCoordinates() == piece.MyCoordinates())
             {
-                Debug.Log("this happened");
                 pieceClone = clonedPiece;
             }
         }
 
         Vector2 origin = piece.MyCoordinates();
-        Debug.Log(pieceClone.MyCoordinates());
+
         foreach (Vector2 move in moves)
         {
             pieceClone.MovePosition(move);
