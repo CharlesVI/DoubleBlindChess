@@ -13,7 +13,7 @@ public class Piece
     public Color playerColor;
     public Color movedColor;
     public bool moved;
-    //public bool active; //I think this is un Needed.
+    public bool firstMove; //Really only needed for the rook & king in regards to castleing 
 
     public Material pawn;
     public Material rook;
@@ -39,6 +39,7 @@ public class Piece
     {
         gameObject.transform.position = new Vector3(destination.x * 3, 1, destination.y * 3);
         moved = true;
+        firstMove = true;
         SetMyColor(movedColor);
         MovePosition(destination);
     }
@@ -215,7 +216,7 @@ public class Piece
         return possibleMoves;
     }
 
-    //TODO add check check and castle.
+    //TODO  castle.
     public List<Vector2> KingMoves(Vector2 position, int player, Tile[,] tiles, Piece[] pieces)
     {
         List<Vector2> possibleMoves = new List<Vector2>();
@@ -233,6 +234,9 @@ public class Piece
         List<Vector2> allowedMoves = new List<Vector2>();
 
         allowedMoves = CheckCheck(possibleMoves, player, tiles);
+
+        //putting this under check check because it already checks that
+        allowedMoves.AddRange(Castle(position, player, tiles, pieces));
 
         return allowedMoves;
     }
@@ -432,6 +436,47 @@ public class Piece
             }
         }
         return lineMoves;
+    }
+
+    List<Vector2> Castle(Vector2 origin, int player, Tile[,] tiles, Piece[] pieces)
+    {
+        List<Vector2> castles = new List<Vector2>();
+        Debug.Log("First Move " + firstMove);
+        if (!firstMove)
+        {
+            if (player == 1)
+            {
+                Debug.Log("Player " + player);
+                foreach (Piece piece in pieces)
+                {
+                    Debug.Log("Type " + piece.type + " First Move " + piece.firstMove + " player " + piece.player);
+                    if (piece.player == 1 && piece.type == Piece.Type.ROOK && !piece.firstMove)
+                    {
+                        Debug.Log("Position " + piece.position);
+                        if (piece.position == new Vector2(0.0f, 0.0f))
+                        {
+                            Debug.Log(tiles[4,0].p2Threat + "" + tiles[3,0].p2Threat + "" +tiles[2,0].p2Threat + ""
+                                 + tiles[3,0].occupied +""+ tiles[2,0].occupied);
+                            if (!tiles[4, 0].p2Threat && !tiles[3, 0].p2Threat && !tiles[2, 0].p2Threat
+                                && !tiles[3, 0].occupied && !tiles[2, 0].occupied)
+                            {
+                                Debug.Log("Got here");
+                                castles.Add(new Vector2(2.0f, 0.0f));
+                            }
+                        }
+
+                        if (piece.position == new Vector2(7.0f, 0.0f))
+                        { }
+                    }
+                }
+            }
+
+            if (player == 2)
+            { 
+            
+            }
+        }
+        return castles;
     }
 
     List<Vector2> KnightMove(Vector2 origin, int player, Tile[,] tiles, Piece[] pieces, int xDirection, int yDirection)
