@@ -571,6 +571,33 @@ public class Main : MonoBehaviour
             MoveGameObject(p1Origin, p1Destination, pieces);
             MoveGameObject(p2Orgin, p2Destination, pieces);
         }
+
+        if (p1Type == Piece.Type.KING && p1Origin == new Vector2(4,0))
+        {
+            if (p1Destination == new Vector2(6, 0))
+            {
+                MoveGameObject(new Vector2(7, 0), new Vector2(5, 0), pieces);
+            }
+
+            if (p1Destination == new Vector2(2, 0))
+            {
+                MoveGameObject(new Vector2(0, 0), new Vector2(3, 0), pieces);
+            }
+        }
+
+        if (p2Type == Piece.Type.KING && p2Orgin == new Vector2(4,7))
+        {
+            if (p2Destination == new Vector2(6, 7))
+            {
+                MoveGameObject(new Vector2(7, 7), new Vector2(5, 7), pieces);
+            }
+
+            if (p2Destination == new Vector2(2, 7))
+            {
+                MoveGameObject(new Vector2(0, 7), new Vector2(3, 7), pieces);
+            }
+        }
+
         //TODO LOG MOVES
 
     }//Move Pieces

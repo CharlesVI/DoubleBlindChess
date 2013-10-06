@@ -441,39 +441,61 @@ public class Piece
     List<Vector2> Castle(Vector2 origin, int player, Tile[,] tiles, Piece[] pieces)
     {
         List<Vector2> castles = new List<Vector2>();
-        Debug.Log("First Move " + firstMove);
+
         if (!firstMove)
         {
             if (player == 1)
             {
-                Debug.Log("Player " + player);
                 foreach (Piece piece in pieces)
                 {
-                    Debug.Log("Type " + piece.type + " First Move " + piece.firstMove + " player " + piece.player);
                     if (piece.player == 1 && piece.type == Piece.Type.ROOK && !piece.firstMove)
                     {
-                        Debug.Log("Position " + piece.position);
                         if (piece.position == new Vector2(0.0f, 0.0f))
                         {
-                            Debug.Log(tiles[4,0].p2Threat + "" + tiles[3,0].p2Threat + "" +tiles[2,0].p2Threat + ""
-                                 + tiles[3,0].occupied +""+ tiles[2,0].occupied);
                             if (!tiles[4, 0].p2Threat && !tiles[3, 0].p2Threat && !tiles[2, 0].p2Threat
-                                && !tiles[3, 0].occupied && !tiles[2, 0].occupied)
+                                && !tiles[3, 0].occupied && !tiles[2, 0].occupied && !tiles[1,0].occupied)
                             {
-                                Debug.Log("Got here");
                                 castles.Add(new Vector2(2.0f, 0.0f));
                             }
                         }
 
                         if (piece.position == new Vector2(7.0f, 0.0f))
-                        { }
+                        {
+                            if (!tiles[4, 0].p2Threat && !tiles[5, 0].p2Threat && !tiles[1, 0].p2Threat
+                                    && !tiles[5, 0].occupied && !tiles[6, 0].occupied)
+                            {
+                                castles.Add(new Vector2(6.0f, 0.0f));
+                            }
+                        }
                     }
                 }
             }
 
             if (player == 2)
-            { 
-            
+            {
+                foreach (Piece piece in pieces)
+                {
+                    if (piece.player == 2 && piece.type == Piece.Type.ROOK && !piece.firstMove)
+                    {
+                        if (piece.position == new Vector2(0.0f, 7.0f))
+                        {
+                            if (!tiles[4, 7].p1Threat && !tiles[3, 7].p1Threat && !tiles[2, 7].p1Threat
+                                && !tiles[3, 7].occupied && !tiles[2, 7].occupied && !tiles[1, 7].occupied)
+                            {
+                                castles.Add(new Vector2(2.0f, 7.0f));
+                            }
+                        }
+
+                        if (piece.position == new Vector2(7.0f, 7.0f))
+                        {
+                            if (!tiles[4, 7].p1Threat && !tiles[5, 7].p1Threat && !tiles[1, 7].p1Threat
+                                    && !tiles[5, 7].occupied && !tiles[6, 7].occupied)
+                            {
+                                castles.Add(new Vector2(6.0f, 7.0f));
+                            }
+                        }
+                    }
+                }
             }
         }
         return castles;
