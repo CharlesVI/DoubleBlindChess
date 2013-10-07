@@ -48,6 +48,12 @@ public class Main : MonoBehaviour
     bool p1Check;
     bool p2Check;
 
+    Vector2 p1EnPassantLocation;
+    Vector2 p1EnPassantCapture;
+
+    Vector2 p2EnPassantLocation;
+    Vector2 p2EnPassantCapture;
+
 	// Use this for initialization
 	void Start () 
     {   
@@ -587,6 +593,13 @@ public class Main : MonoBehaviour
         EnPassant(p1Type, 1, p1Origin, p1Destination);
         EnPassant(p2Type, 2, p2Orgin, p2Destination);
 
+        Debug.Log("p1EpLoc " + p2EnPassantLocation);
+        Debug.Log("p1EpCap " + p2EnPassantCapture);
+
+        EnPassantCapture(p1Type, p1Destination, p1EnPassantLocation, p1EnPassantCapture);
+        EnPassantCapture(p2Type, p2Destination, p2EnPassantLocation, p2EnPassantCapture);
+
+
         //Castle Logic
         if (p1Type == Piece.Type.KING && p1Origin == new Vector2(4,0))
         {
@@ -664,6 +677,10 @@ public class Main : MonoBehaviour
                                     Vector2 location = new Vector2(destination.x, destination.y + 1);
 
                                     piece.EnPassantPossible(location);
+
+                                    p1EnPassantLocation = location;
+
+                                    p1EnPassantCapture = destination;
                                 }
 
                                 if (piece.player == 2)
@@ -671,12 +688,24 @@ public class Main : MonoBehaviour
                                     Vector2 location = new Vector2(destination.x, destination.y - 1);
 
                                     piece.EnPassantPossible(location);
+
+                                    p2EnPassantLocation = location;
+
+                                    p2EnPassantCapture = destination;
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    void EnPassantCapture(Piece.Type type, Vector2 destination, Vector2 enPassantLocation, Vector2 captureLocation)
+    {
+        if (type == Piece.Type.PAWN && destination == enPassantLocation)
+        {
+            CaptureLocation(captureLocation);
         }
     }
 
