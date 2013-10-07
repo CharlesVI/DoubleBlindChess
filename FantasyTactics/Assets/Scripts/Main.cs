@@ -463,6 +463,7 @@ public class Main : MonoBehaviour
         p1Piece.moved = true;
         p2Piece.moved = true;
 
+        //Move the Knights
         if (p1Type != Piece.Type.KNIGHT)
         {
             p1Direction = new Vector2(LeftOrRight(p1x1, p1x2), UpOrDown(p1y1, p1y2));
@@ -484,6 +485,7 @@ public class Main : MonoBehaviour
         Vector2 p1Location = p1Origin;
         Vector2 p2Location = p2Orgin;
 
+        //move non knights
         do
         {
             Vector2 p1FormerLocation = p1Location;
@@ -863,7 +865,10 @@ public class Main : MonoBehaviour
 
         foreach (Piece piece in pieces)
         {
-            tiles[(int)piece.MyCoordinates().x, (int)piece.MyCoordinates().y].occupied = true;
+            if (piece.gameObject.activeInHierarchy)
+            {
+                tiles[(int)piece.MyCoordinates().x, (int)piece.MyCoordinates().y].occupied = true;
+            }
         }
     }
 
@@ -943,7 +948,8 @@ public class Main : MonoBehaviour
     {
         foreach (Piece piece in pieceSet)
         {
-            if (!piece.moved)
+            //If I want moved pieces to not threaten it would go here ish. I think it is a bad idea though.
+            if (piece.gameObject.activeInHierarchy)
             {
                 switch (piece.type)
                 {
@@ -1212,6 +1218,8 @@ public class Main : MonoBehaviour
         for(int ii = 0; ii < 32; ii++)
         {
             virtualPieces[ii] = new Piece();
+
+            virtualPieces[ii].gameObject = pieceSet[ii].gameObject;
             virtualPieces[ii].position = pieceSet[ii].position;
             virtualPieces[ii].type = pieceSet[ii].type;
             virtualPieces[ii].player = pieceSet[ii].player;
