@@ -572,6 +572,11 @@ public class Main : MonoBehaviour
             MoveGameObject(p2Orgin, p2Destination, pieces);
         }
 
+        //Is this really better than the way I did it below?
+        EnPassant(p1Type, 1, p1Origin, p1Destination);
+        EnPassant(p2Type, 2, p2Orgin, p2Destination);
+
+        //Castle Logic
         if (p1Type == Piece.Type.KING && p1Origin == new Vector2(4,0))
         {
             if (p1Destination == new Vector2(6, 0))
@@ -622,6 +627,36 @@ public class Main : MonoBehaviour
 
         Debug.Log("This should not happen!");
         return Piece.Type.KING;
+    }
+
+    void EnPassant(Piece.Type type, int player, Vector2 origin, Vector2 destination)
+    {
+        if (type == Piece.Type.PAWN)
+        {
+            Debug.Log("type pawn 1");
+            if (Mathf.Abs(origin.y - destination.y) == 2)
+            {
+                Debug.Log("distance = 2,  2");
+                int x1 = (int)destination.x + 1;
+                int x2 = (int)destination.x - 1;
+                int y = (int)destination.y;
+
+                foreach (Piece piece in pieces)
+                {
+                    if (piece.player != player)
+                    {
+                        if (piece.type == Piece.Type.PAWN)
+                        {
+                            if (piece.MyCoordinates() == new Vector2(x1, y) ||
+                                piece.MyCoordinates() == new Vector2(x2, y))
+                            {
+                                Debug.Log("en passant possible");
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     #region movement stuff 
@@ -1091,7 +1126,7 @@ public class Main : MonoBehaviour
     List<Vector2> GetOutOfCheck(List<Vector2> moves, Piece piece)
     {
 
-        //By the time I get here I get 6 make Virtual Piece calls gotta fix that.
+        //By the time I get here I get 6 make Virtual Piece calls gotta fix that. (Should be 4) TODO
         List<Vector2> allowedMoves = new List<Vector2>();
 
         Tile[,] virtualTiles = MakeVirtualTiles(tiles);
@@ -1110,18 +1145,10 @@ public class Main : MonoBehaviour
 
         Vector2 origin = virtualPiece.MyCoordinates();
 
-        //Presently the game object is still refrenced and its not working well.
-        //May have to break up the game object coordinates and movement / position apart.
-        //May have to merge tile and piece. Color comes back after move is resolved so I can probally get away with seperating movement and color out.
-        //threat blocks still do not work.
-
-        foreach (Vector2 move in moves) //The problem here is occupation is not what threat check uses. It need piece.
+        foreach (Vector2 move in moves) 
         {
-            Debug.Log(virtualPiece.type);
 
             virtualPiece.MovePosition(move);
-
-            Debug.Log(virtualPiece.MyCoordinates());
 
             UpdateTileOccupation(virtualTiles, virtualPieces);
             
@@ -1134,10 +1161,7 @@ public class Main : MonoBehaviour
                 allowedMoves.Add(move);
             }
 
-            //Blocking now works however some pieces will get "overwritten and not everything then works. Also the king has replaced some of his own men at times.
             virtualPiece.MovePosition(origin);
-            //May have to re set the occupation to original.
-
         }
 
         return allowedMoves;
