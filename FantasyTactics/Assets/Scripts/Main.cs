@@ -64,16 +64,25 @@ public class Main : MonoBehaviour
         if (playerOneReady && playerTwoReady)
         {
             UnMovePieces();
+
             CaptureAndMove();
+
             UpdateTileOccupation(tiles, pieces);
+
             ClearThreats(tiles);
+
             ThreatCheck(tiles, pieces);
+
             p1Check = CheckCheck(1, pieces, tiles);
+
             p2Check = CheckCheck(2, pieces, tiles);
+            
             //CheckMateCheck
+
             ClearHighlights();
 
             playerOneReady = false;
+
             playerTwoReady = false;
         }
 
@@ -572,7 +581,7 @@ public class Main : MonoBehaviour
             MoveGameObject(p2Orgin, p2Destination, pieces);
         }
 
-        //Is this really better than the way I did it below?
+        //Is this really better than the way I did it below? NOTE to self: Yes it is.
         EnPassant(p1Type, 1, p1Origin, p1Destination);
         EnPassant(p2Type, 2, p2Orgin, p2Destination);
 
@@ -633,10 +642,8 @@ public class Main : MonoBehaviour
     {
         if (type == Piece.Type.PAWN)
         {
-            Debug.Log("type pawn 1");
             if (Mathf.Abs(origin.y - destination.y) == 2)
             {
-                Debug.Log("distance = 2,  2");
                 int x1 = (int)destination.x + 1;
                 int x2 = (int)destination.x - 1;
                 int y = (int)destination.y;
@@ -650,7 +657,19 @@ public class Main : MonoBehaviour
                             if (piece.MyCoordinates() == new Vector2(x1, y) ||
                                 piece.MyCoordinates() == new Vector2(x2, y))
                             {
-                                Debug.Log("en passant possible");
+                                if (piece.player == 1)
+                                {
+                                    Vector2 location = new Vector2(destination.x, destination.y + 1);
+
+                                    piece.EnPassantPossible(location);
+                                }
+
+                                if (piece.player == 2)
+                                {
+                                    Vector2 location = new Vector2(destination.x, destination.y - 1);
+
+                                    piece.EnPassantPossible(location);
+                                }
                             }
                         }
                     }
@@ -827,7 +846,7 @@ public class Main : MonoBehaviour
 
     void CapturePiece(Piece piece)
     {
-        piece.gameObject.transform.position = new Vector3(0, -10, 0);
+        piece.gameObject.transform.position = new Vector3(-10, -10, -10); //may not be needed.
         piece.gameObject.SetActive(false);
         //tiles[(int)piece.MyCoordinates().x, (int)piece.MyCoordinates().y].occupied = false;
         Debug.Log("A " + piece.type + "for Player " + piece.player + " Has been captured");

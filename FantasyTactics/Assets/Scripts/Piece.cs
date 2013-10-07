@@ -15,6 +15,9 @@ public class Piece
     public bool moved;
     public bool firstMove; //Really only needed for the rook & king in regards to castleing 
 
+    bool enPassantPossible;
+    Vector2 enPassant;
+
     public Material pawn;
     public Material rook;
     public Material knight;
@@ -58,6 +61,17 @@ public class Piece
     public Vector2 MyCoordinates()
     {
         return position;
+    }
+
+    public void EnPassantPossible(Vector2 location)
+    {
+        enPassant = location;
+        enPassantPossible = true;
+    }
+
+    public void ClearEnPassant()
+    {
+        enPassantPossible = false;
     }
 
     #region moves
@@ -153,6 +167,11 @@ public class Piece
                     }
                 }
             }
+        }
+
+        if (enPassantPossible)
+        {
+            possibleMoves.Add(enPassant);
         }
 
         return possibleMoves;
