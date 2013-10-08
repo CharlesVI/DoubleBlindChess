@@ -6,10 +6,11 @@ public class Main : MonoBehaviour
 {
     // TODO
     // Pawns need to "bounce" on collision
-    // King + Castle
-    // enPassant
-    // check mate and moving out of check.
-
+    // check mate
+    // check notification
+    //Pawn promotion
+    //Victory Condition.
+    //Game reset.
 
     int maxX = 8;
     int maxY = 8;
@@ -113,6 +114,7 @@ public class Main : MonoBehaviour
         PlayerSelector();
 
         //Later put in a config Menu
+
         if (GUI.Button(new Rect(10, Screen.height - 50, btnWidth, btnHeight), "Threat On/Off"))
         {
             foreach (Tile tile in tiles)
@@ -451,6 +453,8 @@ public class Main : MonoBehaviour
         p1Type = PieceType(p1x1, p1y1);
         p2Type = PieceType(p2x1, p2y1);
 
+        bool pawnsBounced = false;
+
         foreach (Piece piece in pieces)
         {
             if (p2Orgin == piece.MyCoordinates())
@@ -566,9 +570,34 @@ public class Main : MonoBehaviour
 
             if (p1Location == p2Location)
             {
-                Debug.Log("collision detected");
-                CapturePiece(p1Piece);
-                CapturePiece(p2Piece);
+                //This is where head to head pawn collisions occure for both single and double move.
+                //If I want this off just remove the top if and open up the else.
+                if (p1Type == Piece.Type.PAWN || p2Type == Piece.Type.PAWN)
+                {
+                    Debug.Log("pawn collision detected");
+
+                    if (p1Type == Piece.Type.PAWN && p2Type == Piece.Type.PAWN)
+                    {
+                        Debug.Log("pawn bounce");
+                        pawnsBounced = true;
+                    }
+                    else if (p1Type == Piece.Type.PAWN)
+                    {
+                        CapturePiece(p1Piece);
+                    }
+                    else if (p2Type == Piece.Type.PAWN)
+                    {
+                        CapturePiece(p2Piece);
+                    }
+                }
+                else
+                {
+                    Debug.Log("collision detected");
+
+                    CapturePiece(p1Piece);
+
+                    CapturePiece(p2Piece);
+                }
             }
 
         }
@@ -578,7 +607,16 @@ public class Main : MonoBehaviour
         CaptureCheck(p1Destination);
         CaptureCheck(p2Destination);
 
-        if (p1Destination == p2Orgin)
+        if (pawnsBounced)
+        {
+            p1Destination.y--;
+            p2Destination.y++;
+
+            MoveGameObject(p1Origin, p1Destination, pieces);
+            MoveGameObject(p2Orgin, p2Destination, pieces); //NOTE no longer think i need pieces
+            //to be a feild in this method.
+        }
+        else if (p1Destination == p2Orgin)
         {
             MoveGameObject(p2Orgin, p2Destination, pieces);
             MoveGameObject(p1Origin, p1Destination, pieces );
@@ -592,9 +630,6 @@ public class Main : MonoBehaviour
         //Is this really better than the way I did it below? NOTE to self: Yes it is.
         EnPassant(p1Type, 1, p1Origin, p1Destination);
         EnPassant(p2Type, 2, p2Orgin, p2Destination);
-
-        Debug.Log("p1EpLoc " + p2EnPassantLocation);
-        Debug.Log("p1EpCap " + p2EnPassantCapture);
 
         EnPassantCapture(p1Type, p1Destination, p1EnPassantLocation, p1EnPassantCapture);
         EnPassantCapture(p2Type, p2Destination, p2EnPassantLocation, p2EnPassantCapture);
@@ -1187,12 +1222,10 @@ public class Main : MonoBehaviour
         Piece[] virtualPieces = MakeVirtualPieces(pieces);
         Piece virtualPiece = new Piece();
 
-        Debug.Log(piece.MyCoordinates() + "" + piece.type);
         foreach (Piece vPiece in virtualPieces)
         {
             if (piece.MyCoordinates() == vPiece.MyCoordinates())
             {
-                Debug.Log(piece.MyCoordinates() + "" + piece.type);
                 virtualPiece = vPiece;
             }
         }
