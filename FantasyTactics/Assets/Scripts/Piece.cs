@@ -92,13 +92,16 @@ public class Piece
 
         if (player == 1)
         {
-            if (!tiles[x, y + 1].occupied)
+            if (y + 1 < 8)
             {
-                possibleMoves.Add(new Vector2(x, y + 1));
-
-                if (y == 1 && !tiles[x, y + 2].occupied)
+                if (!tiles[x, y + 1].occupied)
                 {
-                    possibleMoves.Add(new Vector2(x, y + 2));
+                    possibleMoves.Add(new Vector2(x, y + 1));
+
+                    if (y == 1 && !tiles[x, y + 2].occupied)
+                    {
+                        possibleMoves.Add(new Vector2(x, y + 2));
+                    }
                 }
             }
 
@@ -132,13 +135,16 @@ public class Piece
 
         if (player == 2)
         {
-            if (!tiles[x, y - 1].occupied)
+            if (y - 1 > -1)
             {
-                possibleMoves.Add(new Vector2(x, y - 1));
-
-                if (y == 6 && !tiles[x, y - 2].occupied)
+                if (!tiles[x, y - 1].occupied)
                 {
-                    possibleMoves.Add(new Vector2(x, y - 2));
+                    possibleMoves.Add(new Vector2(x, y - 1));
+
+                    if (y == 6 && !tiles[x, y - 2].occupied)
+                    {
+                        possibleMoves.Add(new Vector2(x, y - 2));
+                    }
                 }
             }
 

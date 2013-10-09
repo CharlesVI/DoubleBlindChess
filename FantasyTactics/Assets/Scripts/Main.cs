@@ -5,7 +5,6 @@ using System.Collections.Generic;
 public class Main : MonoBehaviour 
 {
     // TODO
-    // Pawns need to "bounce" on collision
     // check mate
     // check notification
     //Pawn promotion
@@ -36,15 +35,25 @@ public class Main : MonoBehaviour
 
     bool readyToMove;
 
+    bool promotionPossible;
+
     int whatPlayerAmI = 0;
-    
+
+    Piece.Type selectedType = Piece.Type.PAWN;
+
     bool playerOneReady;
     Vector2 p1Origin;
     Vector2 p1Destination;
+    Piece p1Piece;
+    Piece.Type p1PromoChoice;
+    bool p1Promo;
     
     bool playerTwoReady;
     Vector2 p2Orgin;
     Vector2 p2Destination;
+    Piece p2Piece;
+    Piece.Type p2PromoChoice;
+    bool p2Promo;
 
     bool p1Check;
     bool p2Check;
@@ -74,6 +83,8 @@ public class Main : MonoBehaviour
 
             CaptureAndMove();
 
+            PromotePeices();
+
             UpdateTileOccupation(tiles, pieces);
 
             ClearThreats(tiles);
@@ -87,6 +98,8 @@ public class Main : MonoBehaviour
             //CheckMateCheck
 
             ClearHighlights();
+
+            ClearPromotion();
 
             playerOneReady = false;
 
@@ -111,6 +124,12 @@ public class Main : MonoBehaviour
                 AbortMove();
             }          
         }
+
+        if (promotionPossible) //Promo!
+        {
+            PromotionSelection();    
+        }
+
         PlayerSelector();
 
         //Later put in a config Menu
@@ -123,6 +142,8 @@ public class Main : MonoBehaviour
                 ClearHighlights();
             }
         }
+
+        
     }//OnGUI
 
 	void SetupBoard()
@@ -305,10 +326,12 @@ public class Main : MonoBehaviour
             {
                 if (hit.collider.gameObject.transform.position == piece.gameObject.transform.position)
                 {
-                    clickedPiece = piece;
-                    
+                    Debug.Log("Cliecked " + clickedPiece);
+                    clickedPiece = piece;                  
                 }
             }
+
+            StorePiece(clickedPiece);
 
             //Make sure the piece is owned by the player.
             if (clickedPiece.player != whatPlayerAmI)
@@ -420,10 +443,33 @@ public class Main : MonoBehaviour
 
             selectedTile.Destination();
             destination = new Vector2(x, y);
-            readyToMove = true;
+
+            //Later this will be on the UI and only one will be needed.
+            if (whatPlayerAmI == 1)
+            {
+                PromotionCheck(1, destination, p1Piece.type);
+            }
+
+            if (whatPlayerAmI == 2)
+            {
+                PromotionCheck(2, destination, p2Piece.type);
+            }
         }
 
 
+    }
+
+    void StorePiece(Piece clickedPiece)
+    {
+        if (clickedPiece.player == 1)
+        {
+            p1Piece = clickedPiece;
+        }
+
+        if (clickedPiece.player == 2)
+        {
+            p2Piece = clickedPiece;
+        }
     }
 
     void CaptureAndMove()
@@ -665,6 +711,56 @@ public class Main : MonoBehaviour
         //TODO LOG MOVES
 
     }//Move Pieces
+
+    void PromotePeices()
+    {
+        
+        if (p1Promo)
+        {
+            PromotionLogic(p1Piece, p1PromoChoice);
+        }
+
+        if (p2Promo)
+        {
+            PromotionLogic(p2Piece, p2PromoChoice);
+        }
+    
+    }
+
+    void PromotionLogic(Piece piece, Piece.Type type)
+    {
+        GameObject go = new GameObject();
+     
+
+        switch (type)
+        {
+            case Piece.Type.QUEEN:
+
+                go = pieceQueen;
+
+                break;
+
+            case Piece.Type.KNIGHT:
+
+                go = pieceKnight;
+
+                break;
+
+            case Piece.Type.ROOK:
+
+                go = pieceRook;
+
+                break;
+
+            case Piece.Type.BISHOP:
+
+                go = pieceBishop;
+
+                break;
+        }
+
+        piece.type = type;
+    }
 
     void UnMovePieces()
     {
@@ -916,8 +1012,6 @@ public class Main : MonoBehaviour
         piece.gameObject.SetActive(false);
         //tiles[(int)piece.MyCoordinates().x, (int)piece.MyCoordinates().y].occupied = false;
         Debug.Log("A " + piece.type + "for Player " + piece.player + " Has been captured");
-        Debug.Log("TODO log the capture");
-
     }
 
     void UpdateTileOccupation(Tile[,] tiles, Piece[] pieces)
@@ -977,6 +1071,36 @@ public class Main : MonoBehaviour
         ClearHighlights();
     }
 
+    public void PromotionCheck(int player, Vector2 destination, Piece.Type type)
+    {
+
+        //This just does not work out.
+        int row = (int)destination.y;
+
+        if (player == 1 && row == 7 && type == Piece.Type.PAWN)
+        {
+            promotionPossible = true;
+        }
+
+        else if (player == 2 && row == 0 && type == Piece.Type.PAWN)
+        {
+            promotionPossible = true;
+        }
+        else
+        {
+            readyToMove = true;
+        }
+    }
+
+    public void ClearPromotion()
+    {
+        p1PromoChoice = Piece.Type.PAWN;
+        p2PromoChoice = Piece.Type.PAWN;
+        selectedType = Piece.Type.PAWN;
+        p1Promo = false;
+        p2Promo = false;
+    }
+
     public void AbortMove()
     {
         ClearHighlights();
@@ -1004,6 +1128,58 @@ public class Main : MonoBehaviour
         GUI.Label(new Rect(Screen.width - 130, 170, 120, 40), "Player 1 ready: " + playerOneReady);
         GUI.Label(new Rect(Screen.width - 130, 210, 120, 40), "Player 1 check? " + p1Check);
         GUI.Label(new Rect(Screen.width - 130, 250, 120, 40), "Player 2 check? " + p2Check);
+    }
+
+    void PromotionSelection()
+    { 
+        int btnWidth = 120;
+        int btnHeight = 40;
+
+
+
+        if (GUI.Button(new Rect(10, 90, btnWidth, btnHeight), "Queen"))
+        {
+            selectedType = Piece.Type.QUEEN;
+        }
+
+        if (GUI.Button(new Rect(10, 130, btnWidth, btnHeight), "Knight"))
+        {
+            selectedType = Piece.Type.KNIGHT;
+        }
+
+        if (GUI.Button(new Rect(10, 170, btnWidth, btnHeight), "Rook"))
+        {
+            selectedType = Piece.Type.ROOK;
+        }
+
+        if (GUI.Button(new Rect(10, 210, btnWidth, btnHeight), "Bishop"))
+        {
+            selectedType = Piece.Type.BISHOP;
+            Debug.Log("selected " + selectedType);
+        }
+
+        if (selectedType != Piece.Type.PAWN)
+        {
+            if (GUI.Button(new Rect(10, 250, btnWidth, btnHeight), "Confirm " + selectedType ))
+            {
+                Debug.Log("Selected a " + selectedType);
+                if (whatPlayerAmI == 1)
+                {
+                    p1PromoChoice = selectedType;
+                    p1Promo = true;
+                }
+
+                if (whatPlayerAmI == 2)
+                {
+                    p2PromoChoice = selectedType;
+                    p2Promo = true;
+                }
+
+                promotionPossible = false;
+                readyToMove = true;
+               
+            }
+        }
     }
 
     #region threat & check logic
