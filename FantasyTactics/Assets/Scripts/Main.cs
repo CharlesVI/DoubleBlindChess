@@ -10,6 +10,7 @@ public class Main : MonoBehaviour
     //Pawn promotion
     //Victory Condition.
     //Game reset.
+    //Debug get out of check, pawn issue noted in method.
 
     int maxX = 8;
     int maxY = 8;
@@ -85,6 +86,8 @@ public class Main : MonoBehaviour
 
             PromotePeices();
 
+            ClearPromotion();
+
             UpdateTileOccupation(tiles, pieces);
 
             ClearThreats(tiles);
@@ -98,8 +101,6 @@ public class Main : MonoBehaviour
             //CheckMateCheck
 
             ClearHighlights();
-
-            ClearPromotion();
 
             playerOneReady = false;
 
@@ -326,9 +327,10 @@ public class Main : MonoBehaviour
             {
                 if (hit.collider.gameObject.transform.position == piece.gameObject.transform.position)
                 {
-                    Debug.Log("Cliecked " + clickedPiece);
+
                     clickedPiece = piece;                  
-                }
+                      Debug.Log("Cliecked " + clickedPiece.type);
+                }             
             }
 
             StorePiece(clickedPiece);
@@ -501,18 +503,23 @@ public class Main : MonoBehaviour
 
         bool pawnsBounced = false;
 
+        int x = (int)p2Orgin.x;
+        int y = (int)p2Orgin.y;
+
         foreach (Piece piece in pieces)
         {
-            if (p2Orgin == piece.MyCoordinates())
+            if (x == piece.MyCoordinates().x && y == (int)piece.MyCoordinates().y)
             {
+                Debug.Log("Coords" + piece.MyCoordinates().x + "," + piece.MyCoordinates().y);
                 p2Piece = piece;
+                Debug.Log("p2 Piece is " + piece.type + " and player " + piece.player + "Named " + piece.gameObject.name );
             }
 
             if (p1Origin == piece.MyCoordinates())
             {
                 p1Piece = piece;
-            }
-            
+                Debug.Log("p1 Piece is " + piece.type + " and player " + piece.player);
+            }            
         }
 
         //Not sure if this is needed but leaving it for now.
@@ -653,6 +660,18 @@ public class Main : MonoBehaviour
         CaptureCheck(p1Destination);
         CaptureCheck(p2Destination);
 
+        //Promotion Stuff
+        if (p1Type == Piece.Type.PAWN && p1Destination.y == 7)
+        {
+            PromotionLogic(p1Piece, p1PromoChoice);
+        }
+
+        if (p2Type == Piece.Type.PAWN && p2Destination.y == 0)
+        {
+            Debug.Log(p2Piece.type + "p2 piece type, and player > " + p2Piece.player);
+            PromotionLogic(p2Piece, p2PromoChoice);
+        }
+
         if (pawnsBounced)
         {
             p1Destination.y--;
@@ -708,21 +727,26 @@ public class Main : MonoBehaviour
             }
         }
 
+
+
         //TODO LOG MOVES
 
     }//Move Pieces
 
-    void PromotePeices()
+    void PromotePeices() // Seems obsoleate.
     {
-        
+        // A there is no check the peice was not captured. This should move into caputre and move
+        // or at least get a signal flag from here.
         if (p1Promo)
         {
             PromotionLogic(p1Piece, p1PromoChoice);
+            Debug.Log("promo choice for p1 is " + p1PromoChoice);
         }
 
         if (p2Promo)
         {
             PromotionLogic(p2Piece, p2PromoChoice);
+            Debug.Log("Prm Choice p2 is " + p2PromoChoice);
         }
     
     }
@@ -759,7 +783,10 @@ public class Main : MonoBehaviour
                 break;
         }
 
+        Debug.Log("type is " + type + " formerly a " + piece.type) ;
         piece.type = type;
+        Debug.Log("Piece for player " + piece.player + " set to " + piece.type + " At pos " + piece.MyCoordinates());
+
     }
 
     void UnMovePieces()
@@ -1008,9 +1035,10 @@ public class Main : MonoBehaviour
 
     void CapturePiece(Piece piece)
     {
-        piece.gameObject.transform.position = new Vector3(-10, -10, -10); //may not be needed.
+        piece.MoveGameObject( new Vector3(-10, -10, -10)) ; //may not be needed.
         piece.gameObject.SetActive(false);
         //tiles[(int)piece.MyCoordinates().x, (int)piece.MyCoordinates().y].occupied = false;
+        piece.captured = true;
         Debug.Log("A " + piece.type + "for Player " + piece.player + " Has been captured");
     }
 
@@ -1099,6 +1127,7 @@ public class Main : MonoBehaviour
         selectedType = Piece.Type.PAWN;
         p1Promo = false;
         p2Promo = false;
+        promotionPossible = false;
     }
 
     public void AbortMove()
@@ -1166,17 +1195,16 @@ public class Main : MonoBehaviour
                 if (whatPlayerAmI == 1)
                 {
                     p1PromoChoice = selectedType;
-                    p1Promo = true;
                 }
 
                 if (whatPlayerAmI == 2)
                 {
                     p2PromoChoice = selectedType;
-                    p2Promo = true;
                 }
 
                 promotionPossible = false;
                 readyToMove = true;
+                //Honestly Should probally just open confirm dialog here.
                
             }
         }
@@ -1390,7 +1418,7 @@ public class Main : MonoBehaviour
 
     List<Vector2> GetOutOfCheck(List<Vector2> moves, Piece piece)
     {
-
+        //NOTE problem with pawns captureing other pawns to remove the king from check
         //By the time I get here I get 6 make Virtual Piece calls gotta fix that. (Should be 4) TODO
         List<Vector2> allowedMoves = new List<Vector2>();
 

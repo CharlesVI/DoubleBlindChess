@@ -14,6 +14,7 @@ public class Piece
     public Color movedColor;
     public bool moved;
     public bool firstMove; //Really only needed for the rook & king in regards to castleing 
+    public bool captured;
 
     bool enPassantPossible;
     Vector2 enPassant;
