@@ -1214,7 +1214,7 @@ public class Main : MonoBehaviour
         foreach (Piece piece in pieceSet)
         {
             //If I want moved pieces to not threaten it would go here ish. I think it is a bad idea though.
-            if (piece.gameObject.activeInHierarchy)
+            if (!piece.captured)
             {
                 switch (piece.type)
                 {
@@ -1423,6 +1423,8 @@ public class Main : MonoBehaviour
         //Used to determin checkmate it will reduce the generation of virtual stuff to once
         //Instead of once per piece.
 
+        //TODO we gotta add captures to the equation.
+
         List<Vector2> allowedMoves = new List<Vector2>();
 
         Tile[,] virtualTiles = MakeVirtualTiles(tiles);
@@ -1441,6 +1443,16 @@ public class Main : MonoBehaviour
 
         foreach (Vector2 move in moves) 
         {
+            foreach (Piece vPiece in virtualPieces)
+            {
+                Debug.Log("tested" + vPiece.MyCoordinates());
+                if (vPiece.MyCoordinates() == move)
+                {
+                    Debug.Log("Captured @ " + move);
+                    vPiece.captured = true;
+                }
+            }
+
 
             virtualPiece.MovePosition(move);
 
@@ -1491,7 +1503,7 @@ public class Main : MonoBehaviour
                 }
                 if (moves.Count > 0) //Seems like you get one extra move?
                 {
-                    Debug.Log(ClickedPieceMoves(piece).Count);
+                    Debug.Log("not check mate");
                     return false;
                 }
             }

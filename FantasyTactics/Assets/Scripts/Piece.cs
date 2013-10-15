@@ -48,6 +48,13 @@ public class Piece
         MovePosition(destination);
     }
 
+    public void CapturePiece()
+    {
+        this.gameObject.SetActive(false);
+        this.captured = true;
+        this.MoveGameObject(new Vector3(-10, -10, -10)); //Prob un needed
+    }
+
     public void UnMovePiece()
     {
         moved = false;
