@@ -65,7 +65,6 @@ public class Main : MonoBehaviour
     Vector2 p2EnPassantLocation;
     Vector2 p2EnPassantCapture;
 
-	// Use this for initialization
 	void Start () 
     {   
         SetupBoard();
@@ -73,7 +72,6 @@ public class Main : MonoBehaviour
         ThreatCheck(tiles, pieces);
 	}
 
-    // Update is called once per frame
     void Update()
     {
         GetInput();
@@ -97,8 +95,8 @@ public class Main : MonoBehaviour
             p1Check = CheckCheck(1, pieces, tiles);
 
             p2Check = CheckCheck(2, pieces, tiles);
-            
-            //CheckMateCheck
+
+            IsItCheckMate();
 
             ClearHighlights();
 
@@ -329,7 +327,7 @@ public class Main : MonoBehaviour
                 {
 
                     clickedPiece = piece;                  
-                      Debug.Log("Cliecked " + clickedPiece.type);
+                    //Debug.Log("Cliecked " + clickedPiece.type);
                 }             
             }
 
@@ -510,15 +508,12 @@ public class Main : MonoBehaviour
         {
             if (x == piece.MyCoordinates().x && y == (int)piece.MyCoordinates().y)
             {
-                Debug.Log("Coords" + piece.MyCoordinates().x + "," + piece.MyCoordinates().y);
                 p2Piece = piece;
-                Debug.Log("p2 Piece is " + piece.type + " and player " + piece.player + "Named " + piece.gameObject.name );
             }
 
             if (p1Origin == piece.MyCoordinates())
             {
                 p1Piece = piece;
-                Debug.Log("p1 Piece is " + piece.type + " and player " + piece.player);
             }            
         }
 
@@ -806,7 +801,6 @@ public class Main : MonoBehaviour
                 return piece.type;
             }
         }
-
         Debug.Log("This should not happen!");
         return Piece.Type.KING;
     }
@@ -870,41 +864,43 @@ public class Main : MonoBehaviour
     #region movement stuff 
 
     List<Vector2> ClickedPieceMoves(Piece clickedPiece)
+        //I now notice that passing the origin or piece.position is completly un needed
+        //I'll leave it be for now but it may get moved out on the server split.
     {
         List<Vector2> possibleMoves = new List<Vector2>();
 
         switch (clickedPiece.type)
         {
             case Piece.Type.PAWN:
-                //TODO attack and enpassant 
-                possibleMoves = clickedPiece.PawnMoves(origin, clickedPiece.player, tiles,
+                
+                possibleMoves = clickedPiece.PawnMoves(clickedPiece.position, clickedPiece.player, tiles,
                     pieces);
                 break;
 
             case Piece.Type.BISHOP:
-                possibleMoves = clickedPiece.BishopMoves(origin, clickedPiece.player,
+                possibleMoves = clickedPiece.BishopMoves(clickedPiece.position, clickedPiece.player,
                     tiles, pieces);
                 break;
 
             case Piece.Type.KNIGHT:
-                possibleMoves = clickedPiece.KnightMoves(origin, clickedPiece.player,
+                possibleMoves = clickedPiece.KnightMoves(clickedPiece.position, clickedPiece.player,
                     tiles, pieces);
                 break;
 
             case Piece.Type.ROOK:
-                possibleMoves = clickedPiece.RookMoves(origin, clickedPiece.player,
+                possibleMoves = clickedPiece.RookMoves(clickedPiece.position, clickedPiece.player,
                     tiles, pieces);
                 break;
 
             case Piece.Type.QUEEN:
-                possibleMoves = clickedPiece.QueenMoves(origin, clickedPiece.player,
+                possibleMoves = clickedPiece.QueenMoves(clickedPiece.position, clickedPiece.player,
                     tiles, pieces);
                 break;
 
             case Piece.Type.KING:
                 KingStuff(clickedPiece);
 
-                possibleMoves = clickedPiece.KingMoves(origin, clickedPiece.player,
+                possibleMoves = clickedPiece.KingMoves(clickedPiece.position, clickedPiece.player,
                     tiles, pieces);
                 break;
 
@@ -1035,6 +1031,7 @@ public class Main : MonoBehaviour
 
     void CapturePiece(Piece piece)
     {
+        //NOTE this really should be moved into pieces.
         piece.MoveGameObject( new Vector3(-10, -10, -10)) ; //may not be needed.
         piece.gameObject.SetActive(false);
         //tiles[(int)piece.MyCoordinates().x, (int)piece.MyCoordinates().y].occupied = false;
@@ -1420,6 +1417,12 @@ public class Main : MonoBehaviour
     {
         //NOTE problem with pawns captureing other pawns to remove the king from check
         //By the time I get here I get 6 make Virtual Piece calls gotta fix that. (Should be 4) TODO
+
+        // The way I do this will be horribly inneficent I think. If performance becomes an issue
+        //I should head here first. Most notably if I pass a list instead of a single peice when
+        //Used to determin checkmate it will reduce the generation of virtual stuff to once
+        //Instead of once per piece.
+
         List<Vector2> allowedMoves = new List<Vector2>();
 
         Tile[,] virtualTiles = MakeVirtualTiles(tiles);
@@ -1456,6 +1459,44 @@ public class Main : MonoBehaviour
         }
 
         return allowedMoves;
+    }
+
+    void IsItCheckMate()
+    {
+        if (p1Check)
+        {
+            Debug.Log(CheckMateCheck(1));
+        }
+
+        if (p2Check)
+        {
+            Debug.Log(
+            CheckMateCheck(2));
+        }
+    }
+
+    bool CheckMateCheck(int player)
+    {
+        foreach (Piece piece in pieces)
+        {
+            Debug.Log("Checked Piece @ " + piece.MyCoordinates());
+            if (!piece.captured && piece.player == player)
+            {
+                List<Vector2> moves = GetOutOfCheck(ClickedPieceMoves(piece), piece);
+                Debug.Log("Piece being checked is " + piece.type + " " + piece.gameObject.name);
+                Debug.Log(moves.Count);
+                foreach (Vector2 move in moves)
+                {
+                    Debug.Log("possible move" + move);
+                }
+                if (moves.Count > 0) //Seems like you get one extra move?
+                {
+                    Debug.Log(ClickedPieceMoves(piece).Count);
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     #endregion

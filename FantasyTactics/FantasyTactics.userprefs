@@ -2,11 +2,15 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Main.cs">
     <Files>
-      <File FileName="Assets\Scripts\Main.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Main.cs" Line="250" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="C:\Users\Chuck\Documents\Repos\FantasyTactics\FantasyTactics\Assets\Scripts\Main.cs" line="1478" />
+      <Breakpoint file="C:\Users\Chuck\Documents\Repos\FantasyTactics\FantasyTactics\Assets\Scripts\Main.cs" line="1480" />
+      <Breakpoint file="C:\Users\Chuck\Documents\Repos\FantasyTactics\FantasyTactics\Assets\Scripts\Main.cs" line="1483" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>
