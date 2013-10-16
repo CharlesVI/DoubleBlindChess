@@ -162,7 +162,7 @@ public class Main : MonoBehaviour
     void DefineStyles()
     {
         winStyle.fontSize = 40;
-        winStyle.normal.textColor = Color.white;
+        winStyle.normal.textColor = Color.yellow;
         winStyle.fontStyle = FontStyle.Bold;
         winStyle.alignment = TextAnchor.MiddleCenter;
     }
@@ -328,17 +328,17 @@ public class Main : MonoBehaviour
 
         if (p1Wins)
         {
-            GUI.Box(fullScreen, "Victory! Player One");
+            GUI.Box(fullScreen, "Victory! Player One", winStyle);
         }
 
         if (p2Wins)
         {
-            GUI.Box(fullScreen, "Player Two Wins!");
+            GUI.Box(fullScreen, "Player Two Wins!", winStyle);
         }
 
         if (tie)
         {
-            GUI.Box(fullScreen, "Draw, Everybody Loses!");
+            GUI.Box(fullScreen, "Draw, Everybody Loses!", winStyle);
         }
 
         
@@ -1564,7 +1564,6 @@ public class Main : MonoBehaviour
     {
         foreach (Piece piece in pieces)
         {
-            Debug.Log("Checked Piece @ " + piece.MyCoordinates());
             if (!piece.captured && piece.player == player)
             {
                 List<Vector2> moves = GetOutOfCheck(ClickedPieceMoves(piece), piece);
