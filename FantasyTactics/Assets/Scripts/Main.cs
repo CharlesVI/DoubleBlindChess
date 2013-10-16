@@ -5,12 +5,10 @@ using System.Collections.Generic;
 public class Main : MonoBehaviour 
 {
     // TODO
-    // check mate
     // check notification
-    //Pawn promotion
+    //Pawn promotion - change graphic
     //Victory Condition.
     //Game reset.
-    //Debug get out of check, pawn issue noted in method.
 
     int maxX = 8;
     int maxY = 8;
@@ -25,6 +23,10 @@ public class Main : MonoBehaviour
     public GameObject pieceKnight;
     public GameObject pieceQueen;
     public GameObject pieceKing;
+
+    public AudioClip check;
+    public AudioClip checkMate;
+    public AudioClip victory;
 
     Piece[] pieces = new Piece[32];
    
@@ -59,14 +61,22 @@ public class Main : MonoBehaviour
     bool p1Check;
     bool p2Check;
 
+    bool p1Wins;
+    bool p2Wins;
+    bool tie;
+
     Vector2 p1EnPassantLocation;
     Vector2 p1EnPassantCapture;
 
     Vector2 p2EnPassantLocation;
     Vector2 p2EnPassantCapture;
 
+    GUIStyle winStyle = new GUIStyle();
+
+
 	void Start () 
-    {   
+    {
+        DefineStyles();
         SetupBoard();
         SetupPieces();
         ThreatCheck(tiles, pieces);
@@ -142,8 +152,20 @@ public class Main : MonoBehaviour
             }
         }
 
+        if (p1Wins || p2Wins || tie)
+        {
+            GameOver();
+        }
         
     }//OnGUI
+
+    void DefineStyles()
+    {
+        winStyle.fontSize = 40;
+        winStyle.normal.textColor = Color.white;
+        winStyle.fontStyle = FontStyle.Bold;
+        winStyle.alignment = TextAnchor.MiddleCenter;
+    }
 
 	void SetupBoard()
     {
@@ -296,6 +318,36 @@ public class Main : MonoBehaviour
         piece.SetPositionOneAbove(tiles[x,y].gameObject);
 
         return piece;
+    }
+
+    void GameOver()
+    {
+        Rect fullScreen = new Rect(0,0,Screen.width,Screen.height);
+
+        GUI.Box(fullScreen, "");
+
+        if (p1Wins)
+        {
+            GUI.Box(fullScreen, "Victory! Player One");
+        }
+
+        if (p2Wins)
+        {
+            GUI.Box(fullScreen, "Player Two Wins!");
+        }
+
+        if (tie)
+        {
+            GUI.Box(fullScreen, "Draw, Everybody Loses!");
+        }
+
+        
+        //Record Stats.
+        //Stop the game loop.
+        //Discconect and close the server.
+        
+        
+
     }
 
     void GetInput()
@@ -1445,7 +1497,6 @@ public class Main : MonoBehaviour
         {
             foreach (Piece vPiece in virtualPieces)
             {
-                Debug.Log("tested" + vPiece.MyCoordinates());
                 if (vPiece.MyCoordinates() == move)
                 {
                     Debug.Log("Captured @ " + move);
@@ -1475,15 +1526,37 @@ public class Main : MonoBehaviour
 
     void IsItCheckMate()
     {
+        bool p1CheckMate = false;
+        bool p2CheckMate = false;
+
         if (p1Check)
         {
-            Debug.Log(CheckMateCheck(1));
+           p1CheckMate = CheckMateCheck(1);
         }
 
         if (p2Check)
         {
-            Debug.Log(
-            CheckMateCheck(2));
+            p2CheckMate = CheckMateCheck(2);
+        }
+
+        if (p1CheckMate && p2CheckMate)
+        {
+            Debug.Log("tie");
+            tie = true;
+        }
+        else if (p1CheckMate)
+        {
+            Debug.Log("P2 wins");
+            p2Wins = true;
+        }
+        else if (p2CheckMate)
+        {
+            Debug.Log("P1 wins");
+            p1Wins = true;
+        }
+        else
+        {
+            Debug.Log("Game goes on");
         }
     }
 
@@ -1496,9 +1569,9 @@ public class Main : MonoBehaviour
             {
                 List<Vector2> moves = GetOutOfCheck(ClickedPieceMoves(piece), piece);
                 Debug.Log("Piece being checked is " + piece.type + " " + piece.gameObject.name);
-                Debug.Log(moves.Count);
                 foreach (Vector2 move in moves)
                 {
+                    //not actually needed
                     Debug.Log("possible move" + move);
                 }
                 if (moves.Count > 0) //Seems like you get one extra move?
