@@ -113,6 +113,7 @@ public class Main : MonoBehaviour
             playerOneReady = false;
 
             playerTwoReady = false;
+            
         }
 
 	}
@@ -341,7 +342,6 @@ public class Main : MonoBehaviour
             GUI.Box(fullScreen, "Draw, Everybody Loses!", winStyle);
         }
 
-        
         //Record Stats.
         //Stop the game loop.
         //Discconect and close the server.
