@@ -345,8 +345,11 @@ public class Main : MonoBehaviour
         //Record Stats.
         //Stop the game loop.
         //Discconect and close the server.
-        
-        
+
+        if (GUI.Button(new Rect((Screen.width / 2) - 120, Screen.height / 4 * 3, 240, 60), "Exit Game"))
+        {
+            Application.Quit();
+        }
 
     }
 
