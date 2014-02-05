@@ -26,7 +26,7 @@ public class Piece
     public Material queen;
     public Material king;
 
-    public void SetPositionOneAbove(GameObject go)
+    public void SetPositionOneAbove(GameObject go) // Move game object more or less does this.
     {
         this.gameObject.transform.position = new Vector3(go.transform.position.x,
             go.transform.position.y + 1, go.transform.position.z);

@@ -5,13 +5,24 @@ using System.Collections.Generic;
 public class Main : MonoBehaviour 
 {
     // TODO
-    // check notification
-    //Pawn promotion - change graphic
-    //Victory Condition.
-    //Game reset.
+    //Alpha******
+    // **Basic Client
+    //CheckMait logic.
+    //Game Reset
+    //Beta ((((((((((((((
+    //server split.
+    //Launcher Client (New client for game play?
+    //Server 
+    //Basic MM.
 
     int maxX = 8;
     int maxY = 8;
+
+    enum GameState { waiting, playing, over };
+    GameState game;
+
+    enum InGameState { p1Moving, p2Moving, p1Up, p2Up, resultReady, resultPlaying }
+    InGameState inGameState;
 
     public GameObject tile;
     
@@ -73,6 +84,8 @@ public class Main : MonoBehaviour
 
     GUIStyle winStyle = new GUIStyle();
 
+    GUIStyle waitingStyle = new GUIStyle();
+
 
 	void Start () 
     {
@@ -84,37 +97,10 @@ public class Main : MonoBehaviour
 
     void Update()
     {
+        
         GetInput();
 
-        if (playerOneReady && playerTwoReady)
-        {
-            UnMovePieces();
-
-            CaptureAndMove();
-
-            PromotePeices();
-
-            ClearPromotion();
-
-            UpdateTileOccupation(tiles, pieces);
-
-            ClearThreats(tiles);
-
-            ThreatCheck(tiles, pieces);
-
-            p1Check = CheckCheck(1, pieces, tiles);
-
-            p2Check = CheckCheck(2, pieces, tiles);
-
-            IsItCheckMate();
-
-            ClearHighlights();
-
-            playerOneReady = false;
-
-            playerTwoReady = false;
-            
-        }
+        GameOn();
 
 	}
 
@@ -122,6 +108,7 @@ public class Main : MonoBehaviour
     {
         float btnHeight = 40;
         float btnWidth = 120;
+
 
         if (readyToMove)
         {
@@ -135,12 +122,52 @@ public class Main : MonoBehaviour
             }          
         }
 
+        switch (inGameState)
+        {
+
+            case InGameState.p1Up:
+
+                PlayerOneUp();
+
+                break;
+
+            case InGameState.p2Up:
+
+                PlayerTwoUP();
+
+                break;
+
+            case InGameState.p1Moving:
+
+                whatPlayerAmI = 1;
+
+                break;
+
+            case InGameState.p2Moving:
+
+                whatPlayerAmI = 2;
+
+                break;
+
+            case InGameState.resultReady:
+
+                whatPlayerAmI = 0;
+                ResultReady();
+
+                break;
+
+            case InGameState.resultPlaying:
+                break;
+
+        }
+
+
         if (promotionPossible) //Promo!
         {
             PromotionSelection();    
         }
 
-        PlayerSelector();
+        UserDebugStuff();
 
         //Later put in a config Menu
 
@@ -157,7 +184,7 @@ public class Main : MonoBehaviour
         {
             GameOver();
         }
-        
+
     }//OnGUI
 
     void DefineStyles()
@@ -166,6 +193,34 @@ public class Main : MonoBehaviour
         winStyle.normal.textColor = Color.yellow;
         winStyle.fontStyle = FontStyle.Bold;
         winStyle.alignment = TextAnchor.MiddleCenter;
+
+
+        waitingStyle.fontSize = 40;
+        waitingStyle.normal.textColor = Color.grey;
+        waitingStyle.normal.background = MakeTex(1, 1, Color.white);
+        waitingStyle.alignment = TextAnchor.UpperCenter;
+    }
+
+    private Texture2D MakeTex(int width, int height, Color col)
+    {
+
+        Color[] pix = new Color[width * height];
+
+        for (int i = 0; i < pix.Length; ++i)
+        {
+
+            pix[i] = col;
+
+        }
+
+        Texture2D result = new Texture2D(width, height);
+
+        result.SetPixels(pix);
+
+        result.Apply();
+
+        return result;
+
     }
 
 	void SetupBoard()
@@ -321,6 +376,42 @@ public class Main : MonoBehaviour
         return piece;
     }
 
+    bool GameOn()
+    {
+        if (playerOneReady && playerTwoReady && inGameState == InGameState.resultPlaying)
+        {
+
+            UnMovePieces();
+
+            CaptureAndMove();
+
+            PromotePeices();
+
+            ClearPromotion();
+
+            UpdateTileOccupation(tiles, pieces);
+
+            ClearThreats(tiles);
+
+            ThreatCheck(tiles, pieces);
+
+            p1Check = CheckCheck(1, pieces, tiles);
+
+            p2Check = CheckCheck(2, pieces, tiles);
+
+            IsItCheckMate();
+
+            ClearHighlights();
+
+            playerOneReady = false;
+
+            playerTwoReady = false;
+
+            return true;
+        }
+        return true;
+    }
+
     void GameOver()
     {
         Rect fullScreen = new Rect(0,0,Screen.width,Screen.height);
@@ -346,12 +437,63 @@ public class Main : MonoBehaviour
         //Stop the game loop.
         //Discconect and close the server.
 
+        if (GUI.Button(new Rect(new Rect((Screen.width / 2) - 120, Screen.height / 3, 240, 60)), "New Game"))
+        {
+            
+        }
+
         if (GUI.Button(new Rect((Screen.width / 2) - 120, Screen.height / 4 * 3, 240, 60), "Exit Game"))
         {
             Application.Quit();
         }
 
     }
+
+    #region GameStateGUI
+
+    void PlayerOneUp()
+    {
+        Rect fullScreen = new Rect(0, 0, Screen.width, Screen.height);
+
+        GUI.Box(fullScreen, "", waitingStyle);
+
+        //Use a P1 Name Variable here.
+        if (GUI.Button(new Rect(new Rect((Screen.width / 2) - 120, Screen.height / 3, 240, 60)), "I'm Ready!"))
+        {
+            whatPlayerAmI = 1;
+            inGameState = InGameState.p1Moving;
+        }
+    }
+
+    void PlayerTwoUP()
+    {
+        Rect fullScreen = new Rect(0, 0, Screen.width, Screen.height);
+
+        GUI.Box(fullScreen, "", waitingStyle);
+
+        //Use a P1 Name Variable here.
+        if (GUI.Button(new Rect(new Rect((Screen.width / 2) - 120, Screen.height / 3, 240, 60)), "I'm Ready!"))
+        {
+            whatPlayerAmI = 2;
+            inGameState = InGameState.p2Moving;
+        }
+    }
+
+    void ResultReady()
+    {
+        Rect fullScreen = new Rect(0, 0, Screen.width, Screen.height);
+
+        GUI.Box(fullScreen, "", waitingStyle);
+
+        //Use a P1 Name Variable here.
+        if (GUI.Button(new Rect(new Rect((Screen.width / 2) - 120, Screen.height / 3, 240, 60)), "I'm Ready!"))
+        {
+            whatPlayerAmI = 1;
+            inGameState = InGameState.resultPlaying;
+        }
+    }
+
+    #endregion
 
     void GetInput()
     {
@@ -412,8 +554,7 @@ public class Main : MonoBehaviour
                 switch (clickedPiece.type)
                 {
                     case Piece.Type.PAWN:
-                        //TODO attack and enpassant 
-                        possibleMoves = IsTheKingPutInCheck(ClickedPieceMoves(clickedPiece), clickedPiece);
+                        possibleMoves = ClickedPieceMoves(clickedPiece);
                         break;
 
                     case Piece.Type.BISHOP:
@@ -450,7 +591,7 @@ public class Main : MonoBehaviour
 
                 if (whatPlayerAmI == 1 && !p1Check)
                 {
-                    HighlightMoves(possibleMoves);
+                    HighlightMoves(IsTheKingPutInCheck(possibleMoves, clickedPiece));
                 }
 
                 if (whatPlayerAmI == 2 && p2Check)
@@ -460,7 +601,7 @@ public class Main : MonoBehaviour
 
                 if (whatPlayerAmI == 2 && !p2Check)
                 {
-                    HighlightMoves(possibleMoves);
+                    HighlightMoves(IsTheKingPutInCheck(possibleMoves, clickedPiece));
                 }
             }//Ownership Check
         }//Clicked a Piece
@@ -803,40 +944,40 @@ public class Main : MonoBehaviour
 
     void PromotionLogic(Piece piece, Piece.Type type)
     {
-        GameObject go = new GameObject();
-     
+        //Going to instansiate a new game object and then clone a peice to it.
+        //I will simply place the new peice in the pawns index.
 
-        switch (type)
+        //CreateNewPiece();
+    
+        Debug.Log("type is " + type + " formerly a " + piece.type) ;
+
+        for (int ii = 0; ii < pieces.Length; ii++)
         {
-            case Piece.Type.QUEEN:
-
-                go = pieceQueen;
-
-                break;
-
-            case Piece.Type.KNIGHT:
-
-                go = pieceKnight;
-
-                break;
-
-            case Piece.Type.ROOK:
-
-                go = pieceRook;
-
-                break;
-
-            case Piece.Type.BISHOP:
-
-                go = pieceBishop;
-
-                break;
+            if (pieces[ii] == piece)
+            {
+                pieces[ii] = ClonePieceAndPromote(piece, type);
+            }
         }
 
-        Debug.Log("type is " + type + " formerly a " + piece.type) ;
-        piece.type = type;
+
         Debug.Log("Piece for player " + piece.player + " set to " + piece.type + " At pos " + piece.MyCoordinates());
 
+    }
+
+    Piece ClonePieceAndPromote(Piece piece, Piece.Type promotion)
+    {
+        Piece clone = new Piece();
+
+        clone = DeclarePiece(promotion, 0, 0);
+        clone.movedColor = piece.movedColor;
+        clone.playerColor = piece.playerColor;
+        clone.player = piece.player;
+
+        clone.MoveGameObject(piece.position);
+
+        piece.CapturePiece();
+
+        return clone;
     }
 
     void UnMovePieces()
@@ -1140,6 +1281,7 @@ public class Main : MonoBehaviour
             playerOneReady = true;
             p1Destination = destination;
             p1Origin = origin;
+            inGameState = InGameState.p2Up;
         }
 
         if (whatPlayerAmI == 2)
@@ -1147,6 +1289,7 @@ public class Main : MonoBehaviour
             playerTwoReady = true;
             p2Destination = destination;
             p2Orgin = origin;
+            inGameState = InGameState.resultReady;
         }
         ClearHighlights();
     }
@@ -1187,7 +1330,7 @@ public class Main : MonoBehaviour
         ClearHighlights();
     }
 
-    public void PlayerSelector()
+    public void UserDebugStuff()
     {
         
 
@@ -1201,6 +1344,17 @@ public class Main : MonoBehaviour
         {
             whatPlayerAmI = 2;
             ClearHighlights();
+        }
+
+        if (GUI.Button(new Rect(Screen.width - 130, 90, 40, 40), "P1 UP"))
+        {
+            inGameState = InGameState.p1Up;
+            Debug.Log(inGameState);
+        }
+
+        if (GUI.Button(new Rect(Screen.width - 170, 90, 40, 40), "P2 UP"))
+        {
+            inGameState = InGameState.p2Up;
         }
 
         GUI.Label(new Rect(Screen.width - 130, 90, 120, 40), "I am player " + whatPlayerAmI);
@@ -1422,10 +1576,6 @@ public class Main : MonoBehaviour
         //Move the piece in question to see if its movement will open
         //an attack route to the king, if it does the move will be prohibited.
 
-
-        //NOTE presently not working, simply just not doing its job. I think tile occupation
-        //Needs to be changed. 
-
         List<Vector2> allowedMoves = new List<Vector2>();
 
         Tile[,] clonedTiles = MakeVirtualTiles(tiles);
@@ -1434,6 +1584,7 @@ public class Main : MonoBehaviour
 
         Piece pieceClone = new Piece();
 
+        //Deep Clones the Peice so I can move it around.
         foreach (Piece clonedPiece in clonedPieces)
         {
             if (clonedPiece.MyCoordinates() == piece.MyCoordinates())
@@ -1486,6 +1637,7 @@ public class Main : MonoBehaviour
         Piece[] virtualPieces = MakeVirtualPieces(pieces);
         Piece virtualPiece = new Piece();
 
+        //Clones the piece in question
         foreach (Piece vPiece in virtualPieces)
         {
             if (piece.MyCoordinates() == vPiece.MyCoordinates())
@@ -1496,6 +1648,7 @@ public class Main : MonoBehaviour
 
         Vector2 origin = virtualPiece.MyCoordinates();
 
+        Debug.Log(moves.Count + " moves to check");
         foreach (Vector2 move in moves) 
         {
             foreach (Piece vPiece in virtualPieces)
@@ -1521,6 +1674,7 @@ public class Main : MonoBehaviour
                 allowedMoves.Add(move);
             }
 
+            //Return Peice to location and try next move.
             virtualPiece.MovePosition(origin);
         }
 
@@ -1571,11 +1725,6 @@ public class Main : MonoBehaviour
             {
                 List<Vector2> moves = GetOutOfCheck(ClickedPieceMoves(piece), piece);
                 Debug.Log("Piece being checked is " + piece.type + " " + piece.gameObject.name);
-                foreach (Vector2 move in moves)
-                {
-                    //not actually needed
-                    Debug.Log("possible move" + move);
-                }
                 if (moves.Count > 0) //Seems like you get one extra move?
                 {
                     Debug.Log("not check mate");
